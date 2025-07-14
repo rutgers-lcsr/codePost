@@ -1,0 +1,33 @@
+{
+    "name": "codepost-sdk",
+    "version": "1.0.0",
+    "description": "codepost sdk for javascript",
+    "main": "dist/index.cjs.js",
+    "module": "dist/index.esm.js",
+    "browser": "dist/index.browser.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite",
+        "test": "vitest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rutgers-lcsr/codePost.git"
+    },
+    "author": "Mohamad Khawam",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rutgers-lcsr/codePost/issues"
+    },
+    "homepage": "https://github.com/rutgers-lcsr/codePost#readme",
+    "devDependencies": {
+        "typescript": "^5.8.3",
+        "vite": "^7.0.4",
+        "vite-plugin-dts": "^4.5.4",
+        "vitest": "^3.2.4"
+    },
+    "dependencies": {
+        "cross-fetch": "^4.1.0"
+    }
+}
