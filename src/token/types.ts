@@ -5,8 +5,9 @@ import {
     RefreshTokenSchema,
     AccessTokenUpdateSchema,
     AccessTokenUpdateResponseSchema,
+    UserLoginSchema,
 } from "./schema";
-
+export type UserLogin = z.infer<typeof UserLoginSchema>;
 export type Token = z.infer<typeof TokenSchema>;
 export type AccessToken = z.infer<typeof AccessTokenSchema>;
 export type RefreshToken = z.infer<typeof RefreshTokenSchema>;

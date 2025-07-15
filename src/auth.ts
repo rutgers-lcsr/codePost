@@ -1,11 +1,11 @@
 import { createError } from "./errors";
-import { CodePostHTTP } from "./http";
 import {
     AccessTokenUpdateRequest,
     AccessTokenUpdateResponse,
     AccessTokenUpdateResponseSchema,
     Token,
 } from "./token";
+import { Tokens } from "./token";
 // TO-DO :
 // Move token request to token client
 
@@ -14,12 +14,9 @@ let refreshToken: string | null = null;
 let refreshTimeout: number | null = null;
 
 export async function login(username: string, password: string) {
-    const response = await CodePostHTTP.post<Token>("/token-auth", {
-        username,
-        password,
-    });
+    const { access, refresh } = await Tokens.login(username, password);
 
-    setToken(response.access, response.refresh);
+    setToken(access, refresh);
 }
 
 /*
@@ -70,22 +67,13 @@ export async function refreshAuthToken() {
     if (!refreshToken) {
         throw createError(`trying to refresh token without refresh token`);
     }
-    // Implement the logic to refresh the token here
-    const response = await CodePostHTTP.post<
-        AccessTokenUpdateResponse,
-        AccessTokenUpdateRequest
-    >(
-        "token-refresh/",
-        { refresh: refreshToken },
-        AccessTokenUpdateResponseSchema,
-    );
-
-    setToken(response.access, response.refresh || refreshToken);
-    return response.access;
+    const { access, refresh } = await Tokens.refresh(refreshToken);
+    setToken(access, refresh || refreshToken);
+    return access;
 }
 export async function verifyToken(token: string) {
     try {
-        await CodePostHTTP.post("token-verify/", { token });
+        await Tokens.verify(token);
         return true;
     } catch (error) {
         console.log(error);
