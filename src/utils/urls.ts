@@ -1,7 +1,17 @@
-export function getUrl(path: string): string | null {
+export function getUrl(baseurl: string, path: string): URL | null {
     try {
-        const url = new URL(path);
-        return url.toString();
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        if (!baseurl.endsWith("/")) {
+            baseurl += "/";
+        }
+        const url = new URL(baseurl + path);
+
+        return url;
     } catch (error) {
         return null;
     }
