@@ -1,23 +1,21 @@
-import { getQueryParams, QueryListParams } from "../api";
+import { BasicFunctions, getQueryParams, QueryListParams } from "../api";
 import { CodePostHTTP } from "../http";
-import { SubmissionHistory } from "../types";
+import { SubmissionSchema } from "./schema";
 import {
     PartnerLinkResponse,
     RegradeRequest,
     StudentSubmission,
+    Submission,
+    SubmissionHistory,
     SubmissionHistoryQuery,
     SubmissionList,
     SubmissionPermissions,
-    SubmissionTest,
     TestResultsResponse,
     UpdateSubmissionHistory,
 } from "./types";
 
 export const Submissions = {
-    list: async (options?: QueryListParams) => {
-        const params = getQueryParams(options);
-        return await CodePostHTTP.get<SubmissionList>(`/submissions/`, params);
-    },
+    ...BasicFunctions<Submission>("/submissions", SubmissionSchema),
     getPermissions: async (submissionId: string) => {
         return await CodePostHTTP.get<SubmissionPermissions>(
             `/submissions/${submissionId}/checkPermission/`,

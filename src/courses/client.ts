@@ -1,5 +1,6 @@
-import { getQueryParams, QueryListParams } from "../api";
+import { BasicFunctions, getQueryParams, QueryListParams } from "../api";
 import { CodePostHTTP } from "../http";
+import { CourseSchema } from "./schema";
 import {
     Course,
     CourseListResponse,
@@ -11,9 +12,10 @@ import {
     CourseSettingsUpdate,
     CourseStudentCaptions,
 } from "./types";
+const basicCourseFunctions = BasicFunctions<Course>("/courses", CourseSchema);
 
 export const Courses = {
-    list: async () => await CodePostHTTP.get<CourseListResponse[]>("/courses/"),
+    ...basicCourseFunctions,
     getCourse: async (courseId: string) =>
         await CodePostHTTP.get<Course>(`/courses/${courseId}/`, {}),
     getCourseSettings: async (courseId: string) =>

@@ -1,21 +1,36 @@
 import { z } from "zod";
 import {
+    AnonymousSubmissionSchema,
     PartnerLinkResponseSchema,
     QueryPartnerLinkSchema,
     QuerySubmissionHistorySchema,
     RegradeRequestSchema,
     StudentSubmissionSchema,
+    StudentSubmissionWithoutGradeSchema,
     SubmissionHistorySchema,
     SubmissionListSchema,
+    SubmissionModelSchema,
     SubmissionSchema,
     SubmissionsPermisionsSchema,
-    SubmissionTestSchema,
+    SubmissionStatusSchema,
+    SubmissionWithoutFilesSchema,
+    SubmissionWithTestsSchema,
     TestResultsResponseSchema,
     UpdateSubmissionHistorySchema,
 } from "./schema";
 
-export type Submission = z.infer<typeof SubmissionSchema>;
+export type Submission = z.infer<typeof SubmissionModelSchema>;
+export type SubmissionWithoutFiles = z.infer<
+    typeof SubmissionWithoutFilesSchema
+>;
+export type SubmissionSerialized = z.infer<typeof SubmissionSchema>;
+export type AnonymousSubmission = z.infer<typeof AnonymousSubmissionSchema>;
 export type StudentSubmission = z.infer<typeof StudentSubmissionSchema>;
+export type SubmissionStatus = z.infer<typeof SubmissionStatusSchema>;
+export type StudentSubmissionWithoutGrade = z.infer<
+    typeof StudentSubmissionWithoutGradeSchema
+>;
+export type SubmissionWithTests = z.infer<typeof SubmissionWithTestsSchema>;
 export type SubmissionList = z.infer<typeof SubmissionListSchema>;
 export type SubmissionPermissions = z.infer<typeof SubmissionsPermisionsSchema>;
 export type SubmissionHistory = z.infer<typeof SubmissionHistorySchema>;
@@ -26,7 +41,6 @@ export type UpdateSubmissionHistory = z.infer<
     typeof UpdateSubmissionHistorySchema
 >;
 export type RegradeRequest = z.infer<typeof RegradeRequestSchema>;
-export type SubmissionTest = z.infer<typeof SubmissionTestSchema>;
 export type TestResultsResponse = z.infer<typeof TestResultsResponseSchema>;
 export type PartnerLinkResponse = z.infer<typeof PartnerLinkResponseSchema>;
 export type QueryPartnerLink = z.infer<typeof QueryPartnerLinkSchema>;

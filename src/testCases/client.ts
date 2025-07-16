@@ -1,0 +1,21 @@
+import { CodePostHTTP } from "../http";
+import { BasicFunctions } from "../api";
+import { RunResponse, TestCase } from "./types";
+import { TestCaseSchema } from "./schema";
+
+export const TestCases = {
+    ...BasicFunctions<TestCase>("/testCases", TestCaseSchema),
+    run: async (
+        testCaseId: string,
+        submissionId: string,
+        files: { [filename: string]: string },
+    ) => {
+        return await CodePostHTTP.post<RunResponse>(
+            `/testCases/${testCaseId}/${submissionId}`,
+            {
+                submission: submissionId,
+                files: JSON.stringify(files),
+            },
+        );
+    },
+};

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { QueryResponseSchemaBase } from "../api";
-export const SubmissionSchema = z.object({
+import { SubmissionTestSchema } from "../submissionTests";
+export const SubmissionModelSchema = z.object({
     assignment: z.number().int().describe("The related assignment_id."),
     students: z
         .array(z.string())
@@ -88,75 +89,81 @@ export const SubmissionSchema = z.object({
         ),
     course: z.number().int().describe("The related course_id."),
 });
-export const StudentSubmissionSchema = z.object({
-    id: z.number().int().describe("The unique ID of the submission."),
-    assignment: z.number().int().describe("The related assignment_id."),
-    students: z
-        .array(z.email())
-        .describe("A list of emails of students for the submission."),
-    isFinalized: z
-        .boolean()
-        .default(false)
-        .describe(
-            "A boolean field. 'True' if the submission is finalized. 'False' otherwise.",
-        ),
-    files: z.any().describe("The files associated with the submission."),
-    grade: z.number().int().default(0).describe("The grade of the submission."),
-    questionIsOpen: z
-        .boolean()
-        .default(false)
-        .describe(
-            "A boolean field. If true the submission has an open question.",
-        ),
-    questionIsRegrade: z
-        .boolean()
-        .default(false)
-        .describe(
-            "A boolean field. If 'True', the submission's question is a regrade request.",
-        ),
-    questionText: z
-        .string()
-        .max(500)
-        .optional()
-        .describe("The text of the question."),
-    questionResponder: z
-        .string()
-        .email()
-        .nullable()
-        .optional()
-        .describe("The email of the responder for the question."),
-    questionResponse: z
-        .string()
-        .optional()
-        .describe("The text of the question response."),
-    questionDate: z
-        .string()
-        .nullable()
-        .optional()
-        .describe("The date the request / question was submitted."),
-    responseDate: z
-        .string()
-        .nullable()
-        .optional()
-        .describe("The date the response was submitted."),
-    dateUploaded: z.string().describe("The date this submission was created."),
-    tests: z.any().describe("The tests associated with the submission."),
-    testRunsCompleted: z
-        .number()
-        .int()
-        .default(0)
-        .describe(
-            "Number of times exposed tests have been run for a submission. It only increments if the maxStudentTestRuns Environment setting is on.",
-        ),
-    lateDayCreditsUsed: z
-        .number()
-        .int()
-        .default(0)
-        .describe("The number of Late Day Credits used by the Submission."),
+
+export const SubmissionsTestSchema = z.object({
+    id: z.number(),
+    submission: z.number(),
+    testCase: z.number(),
+    logs: z.string(),
+    passed: z.boolean(),
+    testCategory: z.number(),
+    created: z.string(),
+    modified: z.string(),
+    isError: z.boolean(),
+});
+// Base object for shared fields
+export const SubmissionBaseSchema = z.object({
+    id: z.number(),
+    assignment: z.number(), // ForeignKey to Assignment (use z.object({...}) if nested)
+    students: z.array(z.email()), // ManyToMany to User, represented as emails
+    grader: z.email().nullable().optional(), // ForeignKey to User, email
+    isFinalized: z.boolean(),
+    dateEdited: z.string().optional(), // ISO date string
+    grade: z.number().nullable().optional(), // Assuming grade is a number, adjust if needed
+    queueOrderKey: z.number().nullable().optional(),
+    dateUploaded: z.string().optional(), // ISO date string
+    questionIsOpen: z.boolean().optional(),
+    questionIsRegrade: z.boolean().optional(),
+    questionText: z.string().nullable().optional(),
+    questionResponder: z.email().nullable().optional(),
+    questionResponse: z.string().nullable().optional(),
+    questionDate: z.string().optional(), // ISO date string
+    responseDate: z.string().optional(), // ISO date string
+    tests: z.array(SubmissionsTestSchema).optional(),
+    testRunsCompleted: z.number().nullable().optional(),
+    lateDayCreditsUsed: z.number().nullable().optional(),
+});
+
+// SubmissionSerializerWithoutFiles
+export const SubmissionWithoutFilesSchema = SubmissionBaseSchema;
+
+// SubmissionSerializer (adds files)
+export const SubmissionSchema = SubmissionBaseSchema.extend({
+    files: z.any().optional(), // Replace with File schema or array if available
+});
+
+// AnonymousSubmissionSerializer
+export const AnonymousSubmissionSchema = SubmissionBaseSchema.omit({
+    students: true,
+});
+
+// SubmissionStatusSerializer omits tests grader dateEdited  grade  queueOrderKey
+export const SubmissionStatusSchema = SubmissionBaseSchema.omit({
+    tests: true,
+    grader: true,
+    dateEdited: true,
+    grade: true,
+    queueOrderKey: true,
+});
+
+// StudentSubmissionSerializer
+export const StudentSubmissionSchema = SubmissionSchema.omit({
+    grader: true,
+});
+
+// StudentSubmissionWithoutGradeSerializer
+export const StudentSubmissionWithoutGradeSchema = StudentSubmissionSchema.omit(
+    { grade: true },
+);
+
+// SubmissionWithTestsSerializer
+export const SubmissionWithTestsSchema = z.object({
+    id: z.number(),
+    tests: z.array(SubmissionsTestSchema), // Replace with SubmissionTest schema if available
 });
 
 export const SubmissionListSchema = QueryResponseSchemaBase.extend({
-    results: z.array(SubmissionSchema),
+    results: z.array(SubmissionModelSchema),
 });
 
 export const SubmissionsPermisionsSchema = z.object({
@@ -199,26 +206,6 @@ export const RegradeRequestSchema = z.object({
         .optional(),
 });
 
-export const SubmissionTestSchema = z.object({
-    id: z.number().int().describe("The unique ID of the submission test."),
-    submission: z.number().int().describe("The related submission ID."),
-    testCase: z.number().int().describe("The related test case ID."),
-    logs: z.string().describe("The logs for this test run."),
-    passed: z.boolean().describe("Whether the test was passed."),
-    testCategory: z
-        .number()
-        .int()
-        .describe(
-            "The ID of the test category (from testCase.testCategory.id).",
-        ),
-    created: z.string().describe("The date this submission test was created."),
-    modified: z
-        .string()
-        .describe("The date this submission test was last modified."),
-    isError: z
-        .boolean()
-        .describe("Whether this test run resulted in an error."),
-});
 export const TestResultsResponseSchema = z.object({
     submissionTests: z
         .array(SubmissionTestSchema)

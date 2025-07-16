@@ -135,4 +135,27 @@ export const CodePostHTTP = {
         const json = await response.json();
         return schema?.parse(json) ?? json;
     },
+    async update<T, D = unknown>(
+        requestedPath: string,
+        data: D,
+        schema?: z.ZodSchema<T>,
+    ): Promise<T> {
+        const url = getUrl(baseUrl, requestedPath);
+        if (!url) {
+            throw createError("Invalid URL");
+        }
+        const headers = getHTTPHeaders();
+
+        const response = await fetch(url, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw createError(`PUT request failed ${error}`, response);
+        }
+        const json = await response.json();
+        return schema?.parse(json) ?? json;
+    },
 };
