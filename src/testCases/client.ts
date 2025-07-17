@@ -11,7 +11,7 @@ export const TestCases = {
         files: { [filename: string]: string },
     ) => {
         return await CodePostHTTP.post<RunResponse>(
-            `/testCases/${testCaseId}/${submissionId}`,
+            `/testCases/${testCaseId}/`,
             {
                 submission: submissionId,
                 files: JSON.stringify(files),

@@ -6,6 +6,7 @@
     "module": "dist/index.esm.js",
     "browser": "dist/index.browser.js",
     "types": "dist/index.d.ts",
+    "type": "module",
     "scripts": {
         "build": "vite build",
         "dev": "vite",
@@ -29,6 +30,7 @@
     },
     "dependencies": {
         "cross-fetch": "^4.1.0",
+        "jest": "^30.0.4",
         "zod": "^4.0.5"
     }
 }

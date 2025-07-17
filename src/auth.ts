@@ -1,49 +1,26 @@
 import { createError } from "./errors";
-import {
-    AccessTokenUpdateRequest,
-    AccessTokenUpdateResponse,
-    AccessTokenUpdateResponseSchema,
-    Token,
-} from "./token";
+
 import { Tokens } from "./token";
-// TO-DO :
-// Move token request to token client
+import { isPairToken, isSlidingToken } from "./token/utils";
+
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
-let refreshTimeout: number | null = null;
+let refreshTimeout: NodeJS.Timeout | number | null = null;
+let tokenType = "sliding"
 
-export async function login(username: string, password: string) {
-    const { access, refresh } = await Tokens.login(username, password);
+import { isBrowser } from "./utils/browser";
 
-    setToken(access, refresh);
-}
 
-/*
-Initalized the authication process if its running in a browser enviroment. Will check if the users is already authenticated
-*/
-function initializeAuth() {
-    if (window) {
-        accessToken = window.localStorage.getItem("accessToken");
-        refreshToken = window.localStorage.getItem("refreshToken");
-        if (accessToken && refreshToken) {
-            setToken(accessToken, refreshToken);
-            refreshAuthToken();
-        }
+async function loginSlidingToken(username: string, password: string) {
+    const loginResponse = await Tokens.login(username, password);
+
+    if (!isSlidingToken(loginResponse)) {
+        throw createError(`Invalid sliding token response: ${JSON.stringify(loginResponse)} ${username} ${password}`);
     }
+    setSlidingToken(loginResponse.token);
 }
-// Clearing the tokens allows for a user to log out
-export function clearTokens() {
-    if (window) {
-        window.localStorage.removeItem("accessToken");
-        window.localStorage.removeItem("refreshToken");
-    }
-    accessToken = null;
-    refreshToken = null;
-}
-
-export function setToken(newAccessToken: string, newRefreshToken: string) {
-    if (refreshTimeout) clearTimeout(refreshTimeout);
+function setSlidingToken(newAccessToken: string) {
     const payload = JSON.parse(atob(newAccessToken.split(".")[1]));
     const expirationTime = payload.exp * 1000;
 
@@ -53,22 +30,98 @@ export function setToken(newAccessToken: string, newRefreshToken: string) {
         throw createError(`trying to set expired token`);
     }
     // set timeout to ask api for another token
-    refreshTimeout = setTimeout(refreshAuthToken, delay + 1000);
-    if (window) {
+    refreshTimeout = setTimeout(refreshSlidingAuthToken, delay + 1000);
+    if (isBrowser) {
         window.localStorage.setItem("accessToken", newAccessToken);
-        window.localStorage.setItem("refreshToken", newRefreshToken);
         return;
     }
     accessToken = newAccessToken;
-    refreshToken = newRefreshToken;
 }
-export async function refreshAuthToken() {
+async function refreshSlidingAuthToken() {
+    let accessToken = getAccessToken();
+    if (!accessToken) {
+        throw createError(`trying to refresh token without refresh token`);
+    }
+    const { token } = await Tokens.refreshSliding(accessToken);
+    setSlidingToken(token);
+    return token;
+}
+
+
+async function loginPair(username: string, password: string) {
+    const loginResponse = await Tokens.login(username, password);
+    if (!isPairToken(loginResponse)) {
+        const { access, refresh } = loginResponse;
+        setTokenPair(access, refresh);
+        return;
+    }
+    throw createError(`Invalid token pair response: ${JSON.stringify(loginResponse)}`);
+}
+
+
+
+/*
+Initalized the authication process if its running in a browser enviroment. Will check if the users is already authenticated
+*/
+function initializeAuth() {
+    if (!isBrowser) return;
+    accessToken = window.localStorage.getItem("accessToken");
+    refreshToken = window.localStorage.getItem("refreshToken");
+
+    if (!accessToken) {
+        return;
+    }
+
+    if (tokenType == "sliding") {
+        setSlidingToken(accessToken);
+    } else if (tokenType == "pair") {
+        if (!refreshToken) {
+            throw createError(`No refresh token found in local storage`);
+        }
+        setTokenPair(accessToken, refreshToken);
+    }
+}
+// Clearing the tokens allows for a user to log out
+export function clearTokens() {
+    if (isBrowser) {
+        window.localStorage.removeItem("accessToken");
+        window.localStorage.removeItem("refreshToken");
+    }
+    accessToken = null;
+    refreshToken = null;
+}
+
+function setTokenPair(access: string, refresh: string) {
+    if (refreshTimeout) clearTimeout(refreshTimeout);
+    const payload = JSON.parse(atob(access.split(".")[1]));
+    const expirationTime = payload.exp * 1000;
+
+    // set the delay to a min before expiration
+    const delay = expirationTime - Date.now();
+    if (delay <= 0) {
+        throw createError(`trying to set expired token`);
+    }
+    // set timeout to ask api for another token
+    refreshTimeout = setTimeout(refreshAuthTokenPair, delay + 1000);
+    if (isBrowser) {
+        window.localStorage.setItem("accessToken", access);
+        window.localStorage.setItem("refreshToken", refresh);
+        return;
+    }
+    accessToken = access;
+    refreshToken = refresh;
+    return;
+
+}
+
+
+async function refreshAuthTokenPair() {
     let refreshToken = getRefreshToken();
     if (!refreshToken) {
         throw createError(`trying to refresh token without refresh token`);
     }
     const { access, refresh } = await Tokens.refresh(refreshToken);
-    setToken(access, refresh || refreshToken);
+    setTokenPair(access, refresh || refreshToken);
     return access;
 }
 export async function verifyToken(token: string) {
@@ -81,8 +134,8 @@ export async function verifyToken(token: string) {
     }
 }
 
-export function getRefreshToken() {
-    if (window) {
+function getRefreshToken() {
+    if (isBrowser) {
         const token = window.localStorage.getItem("refreshToken");
         if (!token) {
             return null;
@@ -95,7 +148,7 @@ export function getRefreshToken() {
     return refreshToken;
 }
 export function getAccessToken() {
-    if (window) {
+    if (isBrowser) {
         const token = window.localStorage.getItem("accessToken");
         if (!token) {
             return null;
@@ -110,3 +163,37 @@ export function getAccessToken() {
 
 // Call initializeAuth to start the authentication process
 initializeAuth();
+
+
+export const Auth = {
+    login: async (username: string, password: string) => {
+        switch (tokenType) {
+            case "sliding":
+                await loginSlidingToken(username, password);
+                break;
+            case "pair":
+                await loginPair(username, password);
+                break;
+            default:
+                throw createError(`Invalid token type: ${tokenType}`);
+        }
+    },
+    setToken: (newAccessToken: string, newRefreshToken?: string) => {
+        switch (tokenType) {
+            case "sliding":
+                setSlidingToken(newAccessToken);
+                break;
+            case "pair":
+                if (!newRefreshToken) {
+                    throw createError("Refresh token must be provided for pair token type");
+                }
+                setTokenPair(newAccessToken, newRefreshToken);
+                break;
+            default:
+                throw createError(`Invalid token type: ${tokenType}`);
+        }
+    },
+    getAccessToken,
+    clearTokens
+}
+

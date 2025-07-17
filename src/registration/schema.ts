@@ -32,3 +32,28 @@ export const VerifyRegistrationTokenResponseSchema = RegistrationTokenResponseSc
 
 export const RegisterAndSetPasswordResponseSchema = RegistrationTokenResponseSchema;
 export const setCredentialsResponseSchema = RegistrationTokenResponseSchema;
+
+
+export const AdminCheckStatusValidResponseSchema = z.object({
+      pending: z.boolean(),
+    status: z.boolean(),
+});
+export const AdminCheckStatusinValidResponseSchema = z.object({
+    errors: z.record(z.string(), z.any()).optional(),
+});
+
+export const AdminCheckStatusResponseSchema = AdminCheckStatusValidResponseSchema.or(AdminCheckStatusinValidResponseSchema);
+
+export const PasswordResetEmailResponseSchema = z.object({
+    success: z.boolean(),
+    errors: z.record(z.string(), z.any()).optional(),
+});
+export const VerifyResetTokenResponseSchema = z.object({
+    isValid: z.boolean(),
+    email: z.email().optional(),
+});
+
+export const PasswordResetResponseSchema = z.object({
+    success: z.boolean(),
+    isValid: z.boolean(),
+})

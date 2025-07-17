@@ -5,13 +5,17 @@ export const UserLoginSchema = z.object({
     password: z.string().min(1).max(4096),
 });
 
-export const TokenSchema = z.object({
+export const SlidingTokenSchema = z.object({
+    token: z.string().min(1).max(4096),
+});
+export const TokenPairSchema = z.object({
     access: z.string().min(1).max(4096),
     refresh: z.string().min(1).max(4096),
 });
+export const TokenSchema = SlidingTokenSchema.or(TokenPairSchema)
 
-export const AccessTokenSchema = TokenSchema.shape.access;
-export const RefreshTokenSchema = TokenSchema.shape.refresh;
+export const AccessTokenSchema = TokenPairSchema.shape.access;
+export const RefreshTokenSchema = TokenPairSchema.shape.refresh;
 
 export const AccessTokenUpdateSchema = z.object({
     refresh: z.string().min(1).max(4096),

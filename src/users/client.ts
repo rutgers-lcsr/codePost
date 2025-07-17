@@ -2,13 +2,12 @@ import z from "zod";
 import { CodePostHTTP } from "../http";
 import { EmailSuccessSchema, UserSchema } from "./schema";
 import { EmailRequest, EmailSuccess, User, UserUpdate } from "./types";
-import { getQueryParams, QueryListParams } from "../api";
+import { BasicFunctions, getQueryParams, QueryListParams } from "../api";
+
+
 
 export const Users = {
-    list: async (params?: QueryListParams) => {
-        const recordParams = getQueryParams(params);
-        return await CodePostHTTP.get<User[]>("/users/", recordParams);
-    },
+    ...BasicFunctions<User, true>("/users/", UserSchema, true),
     emailUser: async (email: string, options: EmailRequest) =>
         await CodePostHTTP.post<EmailSuccess, EmailRequest>(
             `/users/${email}/email/`,

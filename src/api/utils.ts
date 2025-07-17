@@ -9,36 +9,47 @@ export function getQueryParams(params = {}): Record<string, string> {
     }
     return Object.fromEntries(results);
 }
+export function BasicFunctions<
+    ObjectModel,
+    Paged extends boolean = false
+>(
+    endpoint: string,
+    ObjectModelSchema: z.ZodObject<any>,
+    pagedList?: Paged
+) {
+    type PagedListReturn = Promise<QueryResponseBase & { results: ObjectModel[] }>;
+    type UnpagedListReturn = Promise<ObjectModel[]>;
 
-export function BasicFunctions<ObjectModel>(endpoint: string, ObjectModelSchema: z.ZodObject) {
-    return {
-        list: async (options?: QueryListParams) => {
+    const list = pagedList
+        ? async (options?: QueryListParams): PagedListReturn => {
             const params = getQueryParams(options);
-            const response = await CodePostHTTP.get<QueryResponseBase & { results: ObjectModel[] }>(endpoint, params);
-            return response;
-        },
+            return await CodePostHTTP.get<QueryResponseBase & { results: ObjectModel[] }>(endpoint, params);
+        }
+        : async (): UnpagedListReturn => {
+            return await CodePostHTTP.get<ObjectModel[]>(endpoint);
+        };
+
+    return {
+        list: list as Paged extends true
+            ? (options?: QueryListParams) => PagedListReturn
+            : () => UnpagedListReturn,
         create: async (data: Omit<ObjectModel, "id">) => {
-            const validatedData = ObjectModelSchema.omit({ id: true }).parse(data);
-            const response = await CodePostHTTP.post<ObjectModel>(endpoint, validatedData);
-            return response;
+            const validated = ObjectModelSchema.omit({ id: true }).parse(data);
+            return await CodePostHTTP.post<ObjectModel>(endpoint, validated);
         },
         retrieve: async (id: string) => {
-            const response = await CodePostHTTP.get<ObjectModel>(`${endpoint}/${id}`);
-            return response;
+            return await CodePostHTTP.get<ObjectModel>(`${endpoint}/${id}`);
         },
         update: async (id: string, data: ObjectModel) => {
-            const validatedData = ObjectModelSchema.parse(data);
-            const response = await CodePostHTTP.update<ObjectModel>(`${endpoint}/${id}`, validatedData);
-            return response;
+            const validated = ObjectModelSchema.parse(data);
+            return await CodePostHTTP.update<ObjectModel>(`${endpoint}/${id}`, validated);
         },
         delete: async (id: string) => {
-            const response = await CodePostHTTP.delete<ObjectModel>(`${endpoint}/${id}`);
-            return response;
+            return await CodePostHTTP.delete<ObjectModel>(`${endpoint}/${id}`);
         },
         partial_update: async (id: string, data: Partial<ObjectModel>) => {
-            const validatedData = ObjectModelSchema.partial().parse(data);
-            const response = await CodePostHTTP.patch<ObjectModel>(`${endpoint}/${id}`, validatedData);
-            return response;
+            const validated = ObjectModelSchema.partial().parse(data);
+            return await CodePostHTTP.patch<ObjectModel>(`${endpoint}/${id}`, validated);
         },
     };
 }

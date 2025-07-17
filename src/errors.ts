@@ -12,5 +12,7 @@ export function createError(message: string, response?: Response) {
     if (response) {
         return new Error(`${BaseErrorMessage}${message} - ${response.status} ${response.statusText}`);
     }
-    return new Error(`${BaseErrorMessage}${message}`);
+    const error = new Error(`${BaseErrorMessage}${message}`);
+    (error as any).response = response;
+    return error;
 }

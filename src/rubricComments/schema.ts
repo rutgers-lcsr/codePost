@@ -17,7 +17,7 @@ export const CommentsResponseSchema = z.object({
     comments: z.array(z.number()),
 });
 
-export const FeedbackScoreSchema = z.object({
+export const FeedbackScoreResponseSchema = z.object({
     id: z.number(),
     negative: z.number(),
     positive: z.number(),
