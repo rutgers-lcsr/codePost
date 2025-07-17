@@ -3,7 +3,6 @@ import { getUrl } from "./utils/urls";
 import { createError } from "./errors";
 import { getAccessToken } from "./auth";
 import z from "zod";
-const MIN_REFRESH_DELAY = 60 * 1000;
 let baseUrl = "https://api.codepost.io/";
 
 export function setBaseUrl(newBaseUrl: string) {
@@ -41,22 +40,27 @@ function getHTTPHeaders() {
     return headers;
 }
 
+// add error handling for HTTP requests
 export const CodePostHTTP = {
-    async post<T, D = unknown>(
-        requestedPath: string,
-        data: D,
-        schema?: z.ZodSchema<T>,
-    ): Promise<T> {
+    async post<T, D = unknown>(requestedPath: string, data: D, schema?: z.ZodSchema<T>): Promise<T> {
         const url = getUrl(baseUrl, requestedPath);
         if (!url) {
             throw createError("Invalid URL");
         }
         const headers = getHTTPHeaders();
 
+        let body;
+        if (data instanceof FormData) {
+            body = data;
+            headers["Content-Type"] = "multipart/form-data";
+        } else {
+            body = JSON.stringify(data);
+        }
+
         const response = await fetch(url, {
             method: "POST",
             headers,
-            body: JSON.stringify(data),
+            body,
         });
         if (!response.ok) {
             const error = await response.text();
@@ -65,11 +69,7 @@ export const CodePostHTTP = {
         const json = await response.json();
         return schema?.parse(json) ?? json;
     },
-    async get<T>(
-        requestedPath: string,
-        requestParams: Record<string, string> = {},
-        schema?: z.ZodSchema<T>,
-    ): Promise<T> {
+    async get<T>(requestedPath: string, requestParams: Record<string, string> = {}, schema?: z.ZodSchema<T>): Promise<T> {
         const url = getUrl(baseUrl, requestedPath);
         if (!url) {
             throw createError("Invalid URL");
@@ -77,8 +77,7 @@ export const CodePostHTTP = {
         const headers = getHTTPHeaders();
         const params = new URLSearchParams(requestParams);
 
-        const endpointUrl =
-            params.toString() === "" ? url : `${url}?${params.toString()}`;
+        const endpointUrl = params.toString() === "" ? url : `${url}?${params.toString()}`;
 
         const response = await fetch(endpointUrl, {
             method: "GET",
@@ -91,11 +90,7 @@ export const CodePostHTTP = {
         const json = await response.json();
         return schema?.parse(json) ?? json;
     },
-    async patch<T, D = unknown>(
-        requestedPath: string,
-        data: D,
-        schema?: z.ZodSchema<T>,
-    ): Promise<T> {
+    async patch<T, D = unknown>(requestedPath: string, data: D, schema?: z.ZodSchema<T>): Promise<T> {
         const url = getUrl(baseUrl, requestedPath);
         if (!url) {
             throw createError("Invalid URL");
@@ -114,10 +109,7 @@ export const CodePostHTTP = {
         const json = await response.json();
         return schema?.parse(json) ?? json;
     },
-    async delete<T>(
-        requestedPath: string,
-        schema?: z.ZodSchema<T>,
-    ): Promise<T> {
+    async delete<T>(requestedPath: string, schema?: z.ZodSchema<T>): Promise<T> {
         const url = getUrl(baseUrl, requestedPath);
         if (!url) {
             throw createError("Invalid URL");
@@ -135,11 +127,7 @@ export const CodePostHTTP = {
         const json = await response.json();
         return schema?.parse(json) ?? json;
     },
-    async update<T, D = unknown>(
-        requestedPath: string,
-        data: D,
-        schema?: z.ZodSchema<T>,
-    ): Promise<T> {
+    async update<T, D = unknown>(requestedPath: string, data: D, schema?: z.ZodSchema<T>): Promise<T> {
         const url = getUrl(baseUrl, requestedPath);
         if (!url) {
             throw createError("Invalid URL");
