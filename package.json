@@ -10,7 +10,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test": "vitest"
+        "test": "vitest run --slient=false"
     },
     "repository": {
         "type": "git",

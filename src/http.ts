@@ -5,6 +5,7 @@ import { getAccessToken } from "./auth";
 import z from "zod";
 let baseUrl = "https://api.codepost.io/";
 import { isBrowser } from "./utils/browser";
+import { CodePostApiError } from "./api";
 
 export function setBaseUrl(newBaseUrl: string) {
     if (!newBaseUrl) {
@@ -41,30 +42,6 @@ function getHTTPHeaders() {
     return headers;
 }
 
-async function CodepostAPINonOkResponseErrorHandler(response: Response) {
-    const contentType = response.headers.get("Content-Type");
-    if (contentType && contentType.includes("application/json")) {
-        return response.json()
-    }
-    if (contentType && contentType.includes("text/plain")) {
-        return await response.text();
-    }
-    if (isBrowser) {
-        if (contentType && contentType.includes("application/json")) {
-            return response.json()
-        }
-        if (contentType && contentType.includes("text/plain")) {
-            return await response.text();
-        }
-    }
-
-    return response.text().then((text) => {
-        const error = new Error(`Codepost API request failed with status ${response.status}: ${text}`);
-        (error as any).response = response;
-        throw error;
-    });
-}
-
 // add error handling for HTTP requests
 export const CodePostHTTP = {
     async post<T, D = unknown>(requestedPath: string, data: D, schema?: z.ZodSchema<T>): Promise<T> {
@@ -88,10 +65,7 @@ export const CodePostHTTP = {
             body,
         });
         if (!response.ok) {
-            return CodepostAPINonOkResponseErrorHandler(response);
-
-            const error = await response.text();
-            throw createError(`GET request failed ${error}`, response);
+            throw new CodePostApiError(`POST request failed`, response);
         }
         const json = await response.json();
         return schema?.parse(json) ?? json;
@@ -111,10 +85,7 @@ export const CodePostHTTP = {
             headers,
         });
         if (!response.ok) {
-            return CodepostAPINonOkResponseErrorHandler(response);
-
-            const error = await response.text();
-            throw createError(`GET request failed ${error}`, response);
+            throw new CodePostApiError(`GET request failed`, response);
         }
         const json = await response.json();
         return schema?.parse(json) ?? json;
@@ -132,8 +103,7 @@ export const CodePostHTTP = {
             body: JSON.stringify(data),
         });
         if (!response.ok) {
-            const error = await response.text();
-            throw createError(`PATCH request failed ${error}`, response);
+            throw new CodePostApiError(`PATCH request failed`, response);
         }
         const json = await response.json();
         return schema?.parse(json) ?? json;
@@ -150,10 +120,7 @@ export const CodePostHTTP = {
             headers,
         });
         if (!response.ok) {
-            return CodepostAPINonOkResponseErrorHandler(response);
-
-            const error = await response.text();
-            throw createError(`DELETE request failed ${error}`, response);
+            throw new CodePostApiError(`DELETE request failed`, response);
         }
         const json = await response.json();
         return schema?.parse(json) ?? json;
@@ -171,10 +138,7 @@ export const CodePostHTTP = {
             body: JSON.stringify(data),
         });
         if (!response.ok) {
-            return CodepostAPINonOkResponseErrorHandler(response);
-
-            const error = await response.text();
-            throw createError(`PUT request failed ${error}`, response);
+            throw new CodePostApiError(`DELETE request failed`, response);
         }
         const json = await response.json();
         return schema?.parse(json) ?? json;
