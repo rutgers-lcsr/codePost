@@ -23,37 +23,37 @@ export function createClient(baseURL: string) {
 }
 
 export class CodepostClient {
-    users: typeof Users;
-    submissions: typeof Submissions;
-    courses: typeof Courses;
-    assignments: typeof Assignments;
-    comments: typeof Comments;
-    files: typeof Files;
-    registration: typeof Registration;
-    organizations: typeof Organizations;
-    sections: typeof Sections;
-    testCases: typeof TestCases;
-    testCategories: typeof TestCategories;
-    token: typeof Token;
-    rubricCategories: typeof RubricCategories;
-    rubricsComments: typeof RubricsComments;
+    users: typeof Users.Users;
+    submissions: typeof Submissions.Submissions;
+    courses: typeof Courses.Courses;
+    assignments: typeof Assignments.Assignments;
+    comments: typeof Comments.Comments;
+    files: typeof Files.Files;
+    registration: typeof Registration.RegistrationClient;
+    organizations: typeof Organizations.Organizations;
+    sections: typeof Sections.Sections;
+    testCases: typeof TestCases.TestCases;
+    testCategories: typeof TestCategories.TestCategories;
+    token: typeof Token.Tokens;
+    rubricCategories: typeof RubricCategories.RubricCategories;
+    rubricsComments: typeof RubricsComments.RubricComments;
 
     constructor() {
         // Initialize any necessary properties or configurations here
-        this.users = Users;
-        this.submissions = Submissions;
-        this.courses = Courses;
-        this.assignments = Assignments;
-        this.comments = Comments;
-        this.files = Files;
-        this.registration = Registration;
-        this.organizations = Organizations;
-        this.sections = Sections;
-        this.testCases = TestCases;
-        this.testCategories = TestCategories;
-        this.token = Token;
-        this.rubricCategories = RubricCategories;
-        this.rubricsComments = RubricsComments;
+        this.users = Users.Users;
+        this.submissions = Submissions.Submissions;
+        this.courses = Courses.Courses;
+        this.assignments = Assignments.Assignments;
+        this.comments = Comments.Comments;
+        this.files = Files.Files;
+        this.registration = Registration.RegistrationClient;
+        this.organizations = Organizations.Organizations;
+        this.sections = Sections.Sections;
+        this.testCases = TestCases.TestCases;
+        this.testCategories = TestCategories.TestCategories;
+        this.token = Token.Tokens;
+        this.rubricCategories = RubricCategories.RubricCategories;
+        this.rubricsComments = RubricsComments.RubricComments;
 
 
     }
@@ -67,7 +67,7 @@ export class CodepostClient {
         Auth.clearTokens()
     }
     getUser() {
-        return this.registration.RegistrationClient.CurrentUser();
+        return this.registration.CurrentUser();
     }
 
 }
