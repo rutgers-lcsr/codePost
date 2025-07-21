@@ -14,11 +14,12 @@ import { isBrowser } from "./utils/browser";
 
 async function loginSlidingToken(username: string, password: string) {
     const loginResponse = await Tokens.login(username, password);
-
+    const user = loginResponse.user;
     if (!isSlidingToken(loginResponse)) {
         throw createError(`Invalid sliding token response: ${JSON.stringify(loginResponse)} ${username} ${password}`);
     }
     setSlidingToken(loginResponse.token);
+    return user
 }
 function setSlidingToken(newAccessToken: string) {
     const payload = JSON.parse(atob(newAccessToken.split(".")[1]));
@@ -50,12 +51,13 @@ async function refreshSlidingAuthToken() {
 
 async function loginPair(username: string, password: string) {
     const loginResponse = await Tokens.login(username, password);
+    const user = loginResponse.user;
     if (!isPairToken(loginResponse)) {
-        const { access, refresh } = loginResponse;
-        setTokenPair(access, refresh);
-        return;
+        throw createError(`Invalid token pair response: ${JSON.stringify(loginResponse)}`);
     }
-    throw createError(`Invalid token pair response: ${JSON.stringify(loginResponse)}`);
+    const { access, refresh } = loginResponse;
+    setTokenPair(access, refresh);
+    return user;
 }
 
 
