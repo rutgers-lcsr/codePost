@@ -25,7 +25,6 @@
     },
     "homepage": "https://github.com/rutgers-lcsr/codePost#readme",
     "devDependencies": {
-        "vite-plugin-dts": "^4.5.4",
         "vitest": "^3.2.4"
     },
     "dependencies": {
@@ -33,6 +32,7 @@
         "jest": "^30.0.4",
         "zod": "^4.0.5",
         "vite": "^7.0.4",
+        "vite-plugin-dts": "^4.5.4",
         "typescript": "^5.8.3"
 
     }
