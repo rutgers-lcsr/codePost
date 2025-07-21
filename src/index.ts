@@ -17,5 +17,5 @@ export * from "./testCategories";
 export * from "./token";
 export * from "./users";
 export * from "./webhooks";
-export { setBaseUrl } from "./http";
 export * from "./auth";
+export { createClient } from "./client";
