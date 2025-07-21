@@ -18,6 +18,7 @@ export const UserSchema = z.object({
     api_token: z.string().nullable(),
     student_sections: z.array(z.number()),
     hasCredentials: z.boolean(),
+    token: z.string().optional(),
 });
 export const UserListSchema = QueryListParamsSchema.extend({
     results: z.array(UserSchema),

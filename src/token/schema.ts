@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserSchema } from "../users";
 
 export const UserLoginSchema = z.object({
     username: z.string().min(1).max(4096),
@@ -13,7 +14,9 @@ export const TokenPairSchema = z.object({
     refresh: z.string().min(1).max(4096),
 });
 export const TokenSchema = SlidingTokenSchema.or(TokenPairSchema)
-
+export const LoginSchema = TokenSchema.and(z.object({
+    user: UserSchema,
+}))
 export const AccessTokenSchema = TokenPairSchema.shape.access;
 export const RefreshTokenSchema = TokenPairSchema.shape.refresh;
 

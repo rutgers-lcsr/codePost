@@ -2,6 +2,7 @@ import { CodePostHTTP } from "../http";
 import {
     AccessTokenUpdateRequest,
     AccessTokenUpdateResponse,
+    Login,
     SlidingToken,
     Token,
     UserLogin,
@@ -29,7 +30,7 @@ export const Tokens = {
         return response;
     },
     login: async (username: string, password: string) => {
-        const response = await CodePostHTTP.post<Token>("/token-auth/", {
+        const response = await CodePostHTTP.post<Login>("/token-auth/", {
             username,
             password,
         });
