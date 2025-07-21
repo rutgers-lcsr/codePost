@@ -82,7 +82,7 @@ function initializeAuth() {
     }
 }
 // Clearing the tokens allows for a user to log out
-export function clearTokens() {
+function clearTokens() {
     if (isBrowser) {
         window.localStorage.removeItem("accessToken");
         window.localStorage.removeItem("refreshToken");
@@ -124,7 +124,7 @@ async function refreshAuthTokenPair() {
     setTokenPair(access, refresh || refreshToken);
     return access;
 }
-export async function verifyToken(token: string) {
+async function verifyToken(token: string) {
     try {
         await Tokens.verify(token);
         return true;
@@ -147,7 +147,7 @@ function getRefreshToken() {
     }
     return refreshToken;
 }
-export function getAccessToken() {
+function getAccessToken() {
     if (isBrowser) {
         const token = window.localStorage.getItem("accessToken");
         if (!token) {
@@ -194,6 +194,8 @@ export const Auth = {
         }
     },
     getAccessToken,
-    clearTokens
+    clearTokens,
+    verifyToken,
+
 }
 

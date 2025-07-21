@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { getUrl } from "./utils/urls";
 import { createError } from "./errors";
-import { getAccessToken } from "./auth";
+import { Auth } from "./auth";
 import z from "zod";
 let baseUrl = "https://api.codepost.io/";
 import { isBrowser } from "./utils/browser";
@@ -20,7 +20,7 @@ export function setBaseUrl(newBaseUrl: string) {
     baseUrl = newBaseUrl;
 }
 function getHTTPHeaders() {
-    const authToken = getAccessToken();
+    const authToken = Auth.getAccessToken();
 
     const headers: HeadersInit = {
         "Content-Type": "application/json",

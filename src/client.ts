@@ -12,6 +12,7 @@ import * as Sections from "./sections/client";
 import * as TestCases from "./testCases/client";
 import * as TestCategories from "./testCategories/client";
 import * as Token from "./token/client";
+import { Auth } from "./auth";
 import { setBaseUrl } from "./http";
 
 export function createClient(baseURL: string) {
@@ -54,12 +55,16 @@ export class CodepostClient {
         this.rubricCategories = RubricCategories;
         this.rubricsComments = RubricsComments;
 
+
     }
     setBaseUrl(baseURL: string) {
         setBaseUrl(baseURL);
     }
     login(username: string, password: string) {
-        return this.token.Tokens.login(username, password);
+        return Auth.login(username, password);
+    }
+    logout() {
+        Auth.clearTokens()
     }
     getUser() {
         return this.registration.RegistrationClient.CurrentUser();

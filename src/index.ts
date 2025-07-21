@@ -18,4 +18,5 @@ export * from "./token";
 export * from "./users";
 export * from "./webhooks";
 export * from "./auth";
+export { setBaseUrl } from "./http";
 export { createClient } from "./client";
