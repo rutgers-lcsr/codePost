@@ -19,11 +19,11 @@ import {
     UpdateSubmissionHistorySchema,
 } from "./schema";
 
-export type Submission = z.infer<typeof SubmissionModelSchema>;
+export type SubmissionModel = z.infer<typeof SubmissionModelSchema>;
 export type SubmissionWithoutFiles = z.infer<
     typeof SubmissionWithoutFilesSchema
 >;
-export type SubmissionSerialized = z.infer<typeof SubmissionSchema>;
+export type Submission = z.infer<typeof SubmissionSchema>;
 export type AnonymousSubmission = z.infer<typeof AnonymousSubmissionSchema>;
 export type StudentSubmission = z.infer<typeof StudentSubmissionSchema>;
 export type SubmissionStatus = z.infer<typeof SubmissionStatusSchema>;
