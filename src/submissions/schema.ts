@@ -129,7 +129,7 @@ export const SubmissionWithoutFilesSchema = SubmissionBaseSchema;
 
 // SubmissionSerializer (adds files)
 export const SubmissionSchema = SubmissionBaseSchema.extend({
-    files: z.any().optional(), // Replace with File schema or array if available
+    files: z.array(z.number()).optional(),
 });
 
 // AnonymousSubmissionSerializer
