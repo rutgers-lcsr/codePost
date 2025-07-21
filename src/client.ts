@@ -21,7 +21,7 @@ export function createClient(baseURL: string) {
     return client;
 }
 
-class CodepostClient {
+export class CodepostClient {
     users: typeof Users;
     submissions: typeof Submissions;
     courses: typeof Courses;
