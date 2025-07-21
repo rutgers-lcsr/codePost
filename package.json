@@ -11,7 +11,8 @@
         "build": "vite build",
         "dev": "vite",
         "test": "vitest run --silent=false",
-        "test:watch": "vitest --watch --silent=false"
+        "test:watch": "vitest --watch --silent=false",
+        "postinstall": "npm run build"
     },
     "repository": {
         "type": "git",
