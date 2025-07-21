@@ -30,7 +30,7 @@ export const FileSchema = z.object({
     extension: z.string().max(36),
     submission: z.number().int(),
     id: z.number().int(),
-    comments: z.any().optional(),
+    comments: z.array(z.number()).optional(),
     path: z.string().max(500),
     created: z.any(),
 });
