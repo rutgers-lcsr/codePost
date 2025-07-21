@@ -9,12 +9,12 @@ import { RubricCommentSchema } from "./schema";
 
 export const RubricComments = {
     ...BasicFunctions<RubricComment>("/rubricComments", RubricCommentSchema),
-    getComments: async (rubricCommentId: string) => {
+    getComments: async (rubricCommentId: number) => {
         return await CodePostHTTP.get<CommentsResponse>(
             `/rubricComments/${rubricCommentId}/comments/`,
         );
     },
-    getFeedbackScore: async (rubricCommentId: string) => {
+    getFeedbackScore: async (rubricCommentId: number) => {
         return await CodePostHTTP.get<FeedbackScoreResponse>(
             `/rubricComments/${rubricCommentId}/feedbackScore/`,
         );

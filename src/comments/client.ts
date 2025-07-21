@@ -5,11 +5,11 @@ import { Comment, CommentBasic, CommentSerializer, Feedback } from "./types";
 
 export const Comments = {
     ...BasicFunctions<Comment>("/comments", CommentModelSchema),
-    retrieve: async (commentId: string) =>
+    retrieve: async (commentId: number) =>
         await CodePostHTTP.get<CommentSerializer | CommentBasic>(
             `/comments/${commentId}/`,
         ),
-    feedback: async (commentId: string, feedback: string) => {
+    feedback: async (commentId: number, feedback: string) => {
         await CodePostHTTP.patch<CommentBasic, Feedback>(
             `/comments/${commentId}/feedback`,
             {

@@ -6,7 +6,7 @@ import { Section } from "./types";
 
 export const Sections = {
     ...BasicFunctions<Section>("/sections", SectionSchema),
-    async getSubmissions(sectionId: string, assignmentId: string) {
+    async getSubmissions(sectionId: number, assignmentId: number) {
         const params = getQueryParams({ assignment: assignmentId });
         return await CodePostHTTP.get<AnonymousSubmission[] | Submission[]>(
             `/sections/${sectionId}/submissions/`,

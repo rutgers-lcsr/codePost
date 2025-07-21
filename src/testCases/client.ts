@@ -6,8 +6,8 @@ import { TestCaseSchema } from "./schema";
 export const TestCases = {
     ...BasicFunctions<TestCase>("/testCases", TestCaseSchema),
     run: async (
-        testCaseId: string,
-        submissionId: string,
+        testCaseId: number,
+        submissionId: number,
         files: { [filename: string]: string },
     ) => {
         return await CodePostHTTP.post<RunResponse>(

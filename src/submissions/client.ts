@@ -8,7 +8,6 @@ import {
     Submission,
     SubmissionHistory,
     SubmissionHistoryQuery,
-    SubmissionList,
     SubmissionPermissions,
     TestResultsResponse,
     UpdateSubmissionHistory,
@@ -16,13 +15,13 @@ import {
 
 export const Submissions = {
     ...BasicFunctions<Submission>("/submissions", SubmissionSchema),
-    getPermissions: async (submissionId: string) => {
+    getPermissions: async (submissionId: number) => {
         return await CodePostHTTP.get<SubmissionPermissions>(
             `/submissions/${submissionId}/checkPermission/`,
         );
     },
     getHistory: async (
-        submissionId: string,
+        submissionId: number,
         options?: SubmissionHistoryQuery,
     ) => {
         const params = getQueryParams(options);
@@ -32,7 +31,7 @@ export const Submissions = {
         );
     },
     updateHistory: async (
-        submissionId: string,
+        submissionId: number,
         options?: UpdateSubmissionHistory,
     ) => {
         return await CodePostHTTP.patch<SubmissionHistory>(
@@ -40,31 +39,31 @@ export const Submissions = {
             options,
         );
     },
-    submitRegrade: async (submissionId: string, options: RegradeRequest) => {
+    submitRegrade: async (submissionId: number, options: RegradeRequest) => {
         return await CodePostHTTP.patch<
             StudentSubmission | Omit<StudentSubmission, "grade">
         >(`/submissions/${submissionId}/submitRegrade/`, options);
     },
-    deleteRegrade: async (submissionId: string) => {
+    deleteRegrade: async (submissionId: number) => {
         return await CodePostHTTP.patch<
             StudentSubmission | Omit<StudentSubmission, "grade">
         >(`/submissions/${submissionId}/deleteRegrade/`, {});
     },
-    submissionTests: async (submissionId: string) => {
+    submissionTests: async (submissionId: number) => {
         // DEPRECATED
         return "NOT IMPLEMENTED";
     },
-    getTestResults: async (submissionId: string) => {
+    getTestResults: async (submissionId: number) => {
         return await CodePostHTTP.get<TestResultsResponse>(
             `/submissions/${submissionId}/testResults/`,
         );
     },
-    generatePartnerLink: async (submissionId: string) => {
+    generatePartnerLink: async (submissionId: number) => {
         return await CodePostHTTP.get<PartnerLinkResponse>(
             `/submissions/${submissionId}/partnerLink/`,
         );
     },
-    validatePartnerLink: async (submissionId: string, token: string) => {
+    validatePartnerLink: async (submissionId: number, token: string) => {
         const params = getQueryParams({ token });
 
         return await CodePostHTTP.get<string>(
@@ -72,7 +71,7 @@ export const Submissions = {
             params,
         );
     },
-    getPartnerLink: async (submissionId: string, token: string) => {
+    getPartnerLink: async (submissionId: number, token: string) => {
         const params = getQueryParams({ token });
 
         return await CodePostHTTP.get<StudentSubmission>(
@@ -80,12 +79,12 @@ export const Submissions = {
             params,
         );
     },
-    removePartnerLink: async (submissionId: string) => {
+    removePartnerLink: async (submissionId: number) => {
         return await CodePostHTTP.get<"ok">(
             `/submissions/${submissionId}/removePartnerLink/`,
         );
     },
-    notifyStudents: async (submissionId: string) => {
+    notifyStudents: async (submissionId: number) => {
         return await CodePostHTTP.post<"Notifications sent!">(
             `/submissions/${submissionId}/notifyStudents/`,
             {},
