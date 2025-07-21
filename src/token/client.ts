@@ -1,11 +1,9 @@
 import { CodePostHTTP } from "../http";
+import { Login } from "../users";
 import {
     AccessTokenUpdateRequest,
     AccessTokenUpdateResponse,
-    Login,
     SlidingToken,
-    Token,
-    UserLogin,
 } from "./types";
 
 export const Tokens = {

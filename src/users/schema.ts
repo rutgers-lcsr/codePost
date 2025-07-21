@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CourseListResponseSchema } from "../courses";
 import { SectionSchema } from "../sections";
 import { QueryListParamsSchema } from "../api";
+import { TokenSchema } from "../token";
 export const UserSchema = z.object({
     id: z.number(),
     email: z.string(),
@@ -23,7 +24,9 @@ export const UserSchema = z.object({
 export const UserListSchema = QueryListParamsSchema.extend({
     results: z.array(UserSchema),
 });
-
+export const LoginSchema = TokenSchema.and(z.object({
+    user: UserSchema,
+}))
 export const UserUpdateSchema = z.object({
     showProductTips: z.boolean(),
 });

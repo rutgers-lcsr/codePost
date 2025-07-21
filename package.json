@@ -10,7 +10,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test": "vitest run --slient=false"
+        "test": "vitest run --silent=false",
+        "test:watch": "vitest --watch --silent=false"
     },
     "repository": {
         "type": "git",
