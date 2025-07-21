@@ -25,14 +25,15 @@
     },
     "homepage": "https://github.com/rutgers-lcsr/codePost#readme",
     "devDependencies": {
-        "typescript": "^5.8.3",
-        "vite": "^7.0.4",
         "vite-plugin-dts": "^4.5.4",
         "vitest": "^3.2.4"
     },
     "dependencies": {
         "cross-fetch": "^4.1.0",
         "jest": "^30.0.4",
-        "zod": "^4.0.5"
+        "zod": "^4.0.5",
+        "vite": "^7.0.4",
+        "typescript": "^5.8.3"
+
     }
 }
