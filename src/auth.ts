@@ -171,11 +171,9 @@ export const Auth = {
     login: async (username: string, password: string) => {
         switch (tokenType) {
             case "sliding":
-                await loginSlidingToken(username, password);
-                break;
+                return await loginSlidingToken(username, password);
             case "pair":
-                await loginPair(username, password);
-                break;
+                return await loginPair(username, password);
             default:
                 throw createError(`Invalid token type: ${tokenType}`);
         }
