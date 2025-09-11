@@ -1,23 +1,31 @@
 import { getQueryParams } from "../api";
+import { Auth } from "../auth";
 import { CodePostHTTP } from "../http";
 import { User } from "../users";
 import {
     AdminCheckStatusResponse,
-    PasswordResetEmailResponse,
-    VerifyResetTokenResponse,
     EmailRegisterResponse,
     HandleValidationResponse,
+    PasswordResetEmailResponse,
+    PasswordResetResponse,
     RegisterAndSetPasswordResponse,
     SetCredentialsResponse,
     ValidateMoocSignupResponse,
     ValidateNewAdminUserResponse,
     VerifyRegistrationTokenResponse,
-    PasswordResetResponse,
+    VerifyResetTokenResponse,
 } from "./types";
 
 export const RegistrationClient = {
     CurrentUser: async () => {
-        return await CodePostHTTP.get<User & { token: string }>("/registration/current_user/");
+        const currentUser = await CodePostHTTP.get<User & { token: string }>("/registration/current_user/");
+
+        if (currentUser.token) {
+            // Set the token for authenticated requests
+            Auth.setToken(currentUser.token);
+        }
+
+        return currentUser;
     },
     // Join Flow
     EmailRegister: async (email: string, token: string) => {
@@ -69,9 +77,7 @@ export const RegistrationClient = {
         return await CodePostHTTP.get<AdminCheckStatusResponse>("/registration/adminCheckStatus/");
     },
     // Password Reset Flow
-    GetEmailForPasswordReset: async (email: string, is_mooc: boolean,
-
-    ) => {
+    GetEmailForPasswordReset: async (email: string, is_mooc: boolean) => {
         const formData = new FormData();
         formData.append("email", email);
 
@@ -87,7 +93,6 @@ export const RegistrationClient = {
         formData.append("uid", uid);
 
         return await CodePostHTTP.post<VerifyResetTokenResponse, FormData>("/registration/verifyResetToken/", formData);
-
     },
     ResetPassword: async (token: string, uid: string, password1: string) => {
         const formData = new FormData();
