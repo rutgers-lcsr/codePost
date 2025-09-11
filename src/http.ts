@@ -1,11 +1,11 @@
 import fetch from "cross-fetch";
-import { getUrl } from "./utils/urls";
-import { createError } from "./errors";
-import { Auth } from "./auth";
 import z from "zod";
-let baseUrl = "https://api.codepost.io/";
-import { isBrowser } from "./utils/browser";
 import { CodePostApiError } from "./api";
+import { Auth } from "./auth";
+import { createError } from "./errors";
+import { isBrowser } from "./utils/browser";
+import { getUrl } from "./utils/urls";
+let baseUrl = "https://codepost-api.cs.rutgers.edu/";
 
 export function setBaseUrl(newBaseUrl: string) {
     if (!newBaseUrl) {
@@ -29,12 +29,10 @@ function getHTTPHeaders() {
     };
     if (isBrowser) {
         headers["Cookie"] = document.cookie;
-        headers["Referer"] = window.location.href;
         headers["Origin"] = window.location.origin;
         headers["User-Agent"] = navigator.userAgent;
         headers["Accept"] = "application/json";
         headers["X-Requested-With"] = "XMLHttpRequest";
-        headers["X-Forwarded-For"] = window.location.host;
     }
     if (authToken) {
         headers["Authorization"] = `Bearer ${authToken}`;
