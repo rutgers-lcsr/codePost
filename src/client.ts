@@ -58,13 +58,13 @@ export class CodepostClient {
     setBaseUrl(baseURL: string) {
         setBaseUrl(baseURL);
     }
-    login(token: string): void;
+    login(token: string): Promise<any>;
     login(username: string, password: string): Promise<any>;
-    login(tokenOrUsername: string, password?: string): void | Promise<any> {
+    login(tokenOrUsername: string, password?: string): Promise<any> {
         if (password === undefined) {
             // Assume token-based login
             Auth.setToken(tokenOrUsername);
-            return;
+            return Promise.resolve(this.getUser());
         } else {
             // Username/password login
             return Auth.login(tokenOrUsername, password);
