@@ -1,6 +1,7 @@
 import * as Assignments from "./assignments/client";
 import { Auth } from "./auth";
 import * as Comments from "./comments/client";
+
 import * as Courses from "./courses/client";
 import * as Files from "./files/client";
 import { setBaseUrl } from "./http";
@@ -14,11 +15,24 @@ import * as TestCases from "./testCases/client";
 import * as TestCategories from "./testCategories/client";
 import * as Token from "./token/client";
 import * as Users from "./users/client";
-
-export function createClient(baseURL: string = "https://codepost-api.cs.rutgers.edu") {
+import { isBrowser } from "./utils/browser";
+// Extend the Window interface to include codepostClient
+declare global {
+    interface Window {
+        codepostClient: CodepostClient;
+    }
+}
+export function createClient(baseURL: string = "https://codepost-api.cs.rutgers.edu", AccessToken?: string) {
     const client = new CodepostClient();
     client.setBaseUrl(baseURL);
-
+    if (isBrowser) {
+        console.log("Welcome to CodePost SDK!");
+        window.codepostClient = client;
+    }
+    if (AccessToken) {
+        Auth.setToken(AccessToken);
+        client.login(AccessToken);
+    }
     return client;
 }
 

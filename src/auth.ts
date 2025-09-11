@@ -3,14 +3,12 @@ import { createError } from "./errors";
 import { Tokens } from "./token";
 import { isPairToken, isSlidingToken } from "./token/utils";
 
-
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
 let refreshTimeout: NodeJS.Timeout | number | null = null;
-let tokenType = "sliding"
+let tokenType = "sliding";
 
 import { isBrowser } from "./utils/browser";
-
 
 async function loginSlidingToken(username: string, password: string) {
     const loginResponse = await Tokens.login(username, password);
@@ -19,7 +17,7 @@ async function loginSlidingToken(username: string, password: string) {
         throw createError(`Invalid sliding token response: ${JSON.stringify(loginResponse)} ${username} ${password}`);
     }
     setSlidingToken(loginResponse.token);
-    return user
+    return user;
 }
 function setSlidingToken(newAccessToken: string) {
     const payload = JSON.parse(atob(newAccessToken.split(".")[1]));
@@ -48,7 +46,6 @@ async function refreshSlidingAuthToken() {
     return token;
 }
 
-
 async function loginPair(username: string, password: string) {
     const loginResponse = await Tokens.login(username, password);
     const user = loginResponse.user;
@@ -59,8 +56,6 @@ async function loginPair(username: string, password: string) {
     setTokenPair(access, refresh);
     return user;
 }
-
-
 
 /*
 Initalized the authication process if its running in a browser enviroment. Will check if the users is already authenticated
@@ -113,9 +108,7 @@ function setTokenPair(access: string, refresh: string) {
     accessToken = access;
     refreshToken = refresh;
     return;
-
 }
-
 
 async function refreshAuthTokenPair() {
     let refreshToken = getRefreshToken();
@@ -166,7 +159,6 @@ function getAccessToken() {
 // Call initializeAuth to start the authentication process
 initializeAuth();
 
-
 export const Auth = {
     login: async (username: string, password: string) => {
         switch (tokenType) {
@@ -196,6 +188,4 @@ export const Auth = {
     getAccessToken,
     clearTokens,
     verifyToken,
-
-}
-
+};
