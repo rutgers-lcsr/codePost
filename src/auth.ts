@@ -8,7 +8,7 @@ let refreshToken: string | null = null;
 let refreshTimeout: NodeJS.Timeout | number | null = null;
 let tokenType = "sliding";
 
-import { isBrowser } from "./utils/browser";
+import { isBrowser, logger } from "./utils/browser";
 
 async function loginSlidingToken(username: string, password: string) {
     const loginResponse = await Tokens.login(username, password);
@@ -68,14 +68,17 @@ function initializeAuth() {
     if (!accessToken) {
         return;
     }
-
-    if (tokenType == "sliding") {
-        setSlidingToken(accessToken);
-    } else if (tokenType == "pair") {
-        if (!refreshToken) {
-            throw createError(`No refresh token found in local storage`);
+    try {
+        if (tokenType == "sliding") {
+            setSlidingToken(accessToken);
+        } else if (tokenType == "pair") {
+            if (!refreshToken) {
+                throw createError(`No refresh token found in local storage`);
+            }
+            setTokenPair(accessToken, refreshToken);
         }
-        setTokenPair(accessToken, refreshToken);
+    } catch (error) {
+        logger("User is not logged in", error);
     }
 }
 // Clearing the tokens allows for a user to log out
