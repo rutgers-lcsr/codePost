@@ -1,7 +1,9 @@
 import { getQueryParams } from "../api";
 import { Auth } from "../auth";
 import { CodePostHTTP } from "../http";
-import { User } from "../users";
+import { getTokenExpiration, isTokenExpired } from "../token/utils";
+import { User, UserSchema } from "../users";
+import { isBrowser } from "../utils/browser";
 import {
     AdminCheckStatusResponse,
     EmailRegisterResponse,
@@ -18,11 +20,35 @@ import {
 
 export const RegistrationClient = {
     CurrentUser: async () => {
-        const currentUser = await CodePostHTTP.get<User & { token: string }>("/registration/current_user/");
+        if (isBrowser) {
+            // Check local storage for existing user as a cache to avoid unnecessary API calls
+            const storedUser = window.localStorage.getItem("codepost-user");
+            if (storedUser) {
+                const parsedUser: User = JSON.parse(storedUser);
+                const validatedUser = UserSchema.parse(parsedUser); // Validate the structure
+                if (!validatedUser.token || isTokenExpired(validatedUser.token)) {
+                    // If no token, clear the stored user
+                    window.localStorage.removeItem("codepost-user");
+                } else {
+                    return validatedUser;
+                }
+            }
+        }
+
+        const currentUser = await CodePostHTTP.get<User>("/registration/current_user/");
 
         if (currentUser.token) {
-            // Set the token for authenticated requests
-            Auth.setToken(currentUser.token);
+            // Set the token for future authenticated requests
+            const currentToken = Auth.getAccessToken();
+            if (!currentToken || getTokenExpiration(currentToken) < getTokenExpiration(currentUser.token)) {
+                // if no token is set or the current user's token is newer, update it
+                // this allows for tokens that are set not to expire for a while to stay in use unless a newer one is provided
+                Auth.setToken(currentUser.token);
+            }
+        }
+
+        if (isBrowser) {
+            window.localStorage.setItem("codepost-user", JSON.stringify(currentUser));
         }
 
         return currentUser;

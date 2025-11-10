@@ -2,26 +2,26 @@ import { z } from "zod";
 import { QueryResponseSchemaBase } from "../api/index";
 export const CourseSchema = z.object({
     id: z.number(),
-    name: z.string(),
-    period: z.string(),
-    assignments: z.array(z.number()),
-    sections: z.array(z.number()),
-    sendReleasedSubmissionsToBack: z.boolean(),
-    showStudentsStatistics: z.boolean(),
-    timezone: z.string(),
-    emailNewUsers: z.boolean(),
-    anonymousGradingDefault: z.boolean(),
-    allowGradersToEditRubric: z.boolean(),
-    minComments: z.number(),
-    noUnfinalize: z.boolean(),
-    archived: z.boolean(),
-    lateDayCreditsAllowable: z.nullable(z.string()),
-    activateQueue: z.boolean(),
-    inviteCode: z.nullable(z.string()),
-    emailWhitelist: z.string(),
-    inviteCodeEnabled: z.boolean(),
-    enableStudentFeedbackNotifications: z.boolean(),
-    webhooks: z.array(z.number()),
+    name: z.string().max(36),
+    period: z.string().max(32),
+    assignments: z.array(z.number()).optional(),
+    sections: z.array(z.number()).optional(),
+    sendReleasedSubmissionsToBack: z.boolean().default(false),
+    showStudentsStatistics: z.boolean().default(false),
+    timezone: z.string().max(32).default("US/Eastern"),
+    emailNewUsers: z.boolean().default(false),
+    anonymousGradingDefault: z.boolean().default(false),
+    allowGradersToEditRubric: z.boolean().default(false),
+    minComments: z.number().int().default(0),
+    noUnfinalize: z.boolean().default(false),
+    archived: z.boolean().default(false),
+    lateDayCreditsAllowable: z.number().int().nullable().optional(),
+    activateQueue: z.boolean().default(true),
+    inviteCode: z.string().max(10).nullable().optional(),
+    emailWhitelist: z.string().optional(),
+    inviteCodeEnabled: z.boolean().default(false),
+    enableStudentFeedbackNotifications: z.boolean().default(false),
+    webhooks: z.array(z.number()).optional(),
 });
 
 export const CourseListResponseSchema = z.array(CourseSchema);
@@ -35,7 +35,7 @@ export const CourseSettingsSchema = z.object({
     anonymousGradingDefault: z.boolean(),
     allowGradersToEditRubric: z.boolean(),
     archived: z.boolean(),
-    lateDayCreditsAllowable: z.nullable(z.string()),
+    lateDayCreditsAllowable: z.number().int().nullable().optional(),
 });
 
 export const CourseSettingsUpdateSchema = z.object({
@@ -46,7 +46,7 @@ export const CourseSettingsUpdateSchema = z.object({
     anonymousGradingDefault: z.boolean().optional(),
     allowGradersToEditRubric: z.boolean().optional(),
     archived: z.boolean().optional(),
-    lateDayCreditsAllowable: z.nullable(z.string()).optional(),
+    lateDayCreditsAllowable: z.number().int().nullable().optional(),
 });
 
 export const CourseRosterSchema = z.object({

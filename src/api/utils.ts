@@ -15,12 +15,12 @@ export function BasicFunctions<ObjectModel, Paged extends boolean = false>(endpo
 
     const list = pagedList
         ? async (options?: QueryListParams): PagedListReturn => {
-            const params = getQueryParams(options);
-            return await CodePostHTTP.get<QueryResponseBase & { results: ObjectModel[] }>(endpoint, params);
-        }
+              const params = getQueryParams(options);
+              return await CodePostHTTP.get<QueryResponseBase & { results: ObjectModel[] }>(endpoint, params);
+          }
         : async (): UnpagedListReturn => {
-            return await CodePostHTTP.get<ObjectModel[]>(endpoint);
-        };
+              return await CodePostHTTP.get<ObjectModel[]>(endpoint);
+          };
 
     return {
         list: list as Paged extends true ? (options?: QueryListParams) => PagedListReturn : () => UnpagedListReturn,

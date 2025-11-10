@@ -16,6 +16,7 @@ export const AssignmentSchema = z.object({
     allowStudentUpload: z.boolean().default(false),
     allowStudentUploadWithPartners: z.boolean().default(false),
     uploadDueDate: z.iso.datetime().nullable().optional(),
+    maxLateDays: z.number().default(2),
     liveFeedbackMode: z.boolean().default(false),
     allowLateUploads: z.boolean().default(false),
 
@@ -56,6 +57,7 @@ export const AssignmentBaseSchema = z.object({
     allowStudentUpload: z.boolean().default(false),
     allowStudentUploadWithPartners: z.boolean().default(false),
     uploadDueDate: z.iso.datetime().nullable().optional(),
+    maxLateDays: z.number().default(2),
     liveFeedbackMode: z.boolean().default(false),
     allowLateUploads: z.boolean().default(false),
 

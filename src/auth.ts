@@ -1,7 +1,8 @@
 import { createError } from "./errors";
+import { RegistrationClient } from "./registration";
 
 import { Tokens } from "./token";
-import { isPairToken, isSlidingToken } from "./token/utils";
+import { getTokenExpiration, isPairToken, isSlidingToken } from "./token/utils";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
@@ -20,8 +21,7 @@ async function loginSlidingToken(username: string, password: string) {
     return user;
 }
 function setSlidingToken(newAccessToken: string) {
-    const payload = JSON.parse(atob(newAccessToken.split(".")[1]));
-    const expirationTime = payload.exp * 1000;
+    const expirationTime = getTokenExpiration(newAccessToken);
 
     // set the delay to a min before expiration
     const delay = expirationTime - Date.now();
@@ -43,6 +43,11 @@ async function refreshSlidingAuthToken() {
     }
     const { token } = await Tokens.refreshSliding(accessToken);
     setSlidingToken(token);
+
+    if (isBrowser) {
+        RegistrationClient.CurrentUser(); // Refresh the current user with the new token
+    }
+
     return token;
 }
 
@@ -93,8 +98,7 @@ function clearTokens() {
 
 function setTokenPair(access: string, refresh: string) {
     if (refreshTimeout) clearTimeout(refreshTimeout);
-    const payload = JSON.parse(atob(access.split(".")[1]));
-    const expirationTime = payload.exp * 1000;
+    const expirationTime = getTokenExpiration(access);
 
     // set the delay to a min before expiration
     const delay = expirationTime - Date.now();
@@ -110,6 +114,11 @@ function setTokenPair(access: string, refresh: string) {
     }
     accessToken = access;
     refreshToken = refresh;
+
+    if (isBrowser) {
+        RegistrationClient.CurrentUser(); // Refresh the current user with the new token
+    }
+
     return;
 }
 
@@ -173,6 +182,7 @@ export const Auth = {
                 throw createError(`Invalid token type: ${tokenType}`);
         }
     },
+
     setToken: (newAccessToken: string, newRefreshToken?: string) => {
         switch (tokenType) {
             case "sliding":

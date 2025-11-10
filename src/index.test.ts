@@ -1,6 +1,5 @@
+import { beforeAll, describe, expect, it } from "vitest";
 import * as Codepost from "./index";
-import { SubmissionTests } from "./submissionTests/client";
-import { describe, it, expect, beforeAll } from "vitest";
 
 beforeAll(async () => {
     Codepost.setBaseUrl(process.env["API_URL"] || "https://api.codepost.io/");
@@ -78,9 +77,11 @@ describe("Basic Functionality", () => {
             const userinfo = await Codepost.RegistrationClient.CurrentUser();
             async function getCourseInfo(course: Codepost.Course) {
                 expect(Codepost.CourseSchema.safeParse(course).success).toBe(true);
-                for (const assignmentsIds of course.assignments) {
-                    const assignment = await Codepost.Assignments.getAssignment(assignmentsIds);
-                    expect(Codepost.AssignmentSchema.safeParse(assignment).success).toBe(true);
+                if (course.assignments) {
+                    for (const assignmentsIds of course.assignments) {
+                        const assignment = await Codepost.Assignments.getAssignment(assignmentsIds);
+                        expect(Codepost.AssignmentSchema.safeParse(assignment).success).toBe(true);
+                    }
                 }
                 const sections = await Codepost.Courses.getSections(course.id);
                 expect(sections).toHaveProperty("results");
@@ -102,6 +103,31 @@ describe("Basic Functionality", () => {
             for (const course of userinfo.courseadminCourses) {
                 await getCourseInfo(course);
             }
+        } catch (e) {
+            // If unauthorized or forbidden, this will fail
+            if (!Codepost.CodePostApiError.isCodePostApiError(e)) {
+                console.error("Unexpected error:", e);
+                expect(e).toBeFalsy();
+            } else {
+                console.error("CodePostApiError:", e);
+                expect(e.isForbidden()).toBe(false);
+            }
+        }
+    });
+});
+describe("Client Creation", () => {
+    it("Should create a client and access courses", async () => {
+        const client = Codepost.createClient({
+            baseURL: process.env["API_URL"] || "https://api.codepost.io/",
+            accessToken: process.env["API_USER"] ? undefined : process.env["API_TOKEN"],
+        });
+        try {
+            const userinfo = await client.registration.CurrentUser();
+            expect(Codepost.UserSchema.safeParse(userinfo).success).toBe(true);
+            expect(userinfo).toHaveProperty("id");
+            const courses = await client.courses.list();
+            expect(courses).toHaveProperty("results");
+            expect(Codepost.CourseSchema.array().safeParse(courses).success).toBe(true);
         } catch (e) {
             // If unauthorized or forbidden, this will fail
             if (!Codepost.CodePostApiError.isCodePostApiError(e)) {

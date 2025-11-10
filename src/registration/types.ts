@@ -1,15 +1,15 @@
 import { z } from "zod";
 import {
+    AdminCheckStatusResponseSchema,
     EmailRegisterResponseSchema,
+    HandleValidationResponseSchema,
+    PasswordResetEmailResponseSchema,
+    PasswordResetResponseSchema,
     RegisterAndSetPasswordResponseSchema,
-    VerifyRegistrationTokenResponseSchema,
     ValidateMoocSignupResponseSchema,
     ValidateNewAdminUserResponseSchema,
-    HandleValidationResponseSchema,
-    AdminCheckStatusResponseSchema,
-    PasswordResetEmailResponseSchema,
+    VerifyRegistrationTokenResponseSchema,
     VerifyResetTokenResponseSchema,
-    PasswordResetResponseSchema,
 } from "./schema";
 
 export type EmailRegisterResponse = z.infer<typeof EmailRegisterResponseSchema>;

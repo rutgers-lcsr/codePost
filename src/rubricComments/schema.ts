@@ -5,11 +5,11 @@ export const RubricCommentSchema = z.object({
     text: z.string(),
     pointDelta: z.number(),
     category: z.number(),
-    sortKey: z.string(),
-    explanation: z.string(),
-    instructionText: z.string(),
-    templateTextOn: z.boolean(),
-    name: z.string(),
+    sortKey: z.number().default(0),
+    explanation: z.string().optional(),
+    instructionText: z.string().optional(),
+    templateTextOn: z.boolean().default(false),
+    name: z.string().nullable().optional(),
 });
 
 export const CommentsResponseSchema = z.object({
