@@ -1,4 +1,4 @@
-import { BasicFunctions } from "../api";
+import { BasicFunctions } from "../api/utils";
 import { AssignmentFileModelSchema, CourseFileModelSchema, FileSchema, SubmissionFileModelSchema } from "./schema";
 import { AssignmentFile, CourseFile, File, SubmissionFile } from "./types";
 

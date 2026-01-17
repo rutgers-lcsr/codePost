@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QueryListParamsSchema, QueryResponseSchemaBase } from "../api";
+import { QueryListParamsSchema, QueryResponseSchemaBase } from "../api/schema";
 import { TestCaseSchema } from "../testCases";
 import { TestCategorySchema } from "../testCategories";
 import { FileStudentUploadSchema } from "../files";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QueryResponseSchemaBase } from "../api";
+import { QueryResponseSchemaBase } from "../api/schema";
 
 export const OrganizationSchema = z.object({
     id: z.number(),

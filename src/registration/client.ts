@@ -1,4 +1,4 @@
-import { getQueryParams } from "../api";
+import { getQueryParams } from "../api/utils";
 import { Auth } from "../auth";
 import { CodePostHTTP } from "../http";
 import { getTokenExpiration, isTokenExpired } from "../token/utils";

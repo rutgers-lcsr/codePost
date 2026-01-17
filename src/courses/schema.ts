@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QueryResponseSchemaBase } from "../api/index";
+import { QueryResponseSchemaBase } from "../api/schema";
 export const CourseSchema = z.object({
     id: z.number(),
     name: z.string().max(36),
@@ -22,6 +22,9 @@ export const CourseSchema = z.object({
     inviteCodeEnabled: z.boolean().default(false),
     enableStudentFeedbackNotifications: z.boolean().default(false),
     webhooks: z.array(z.number()).optional(),
+    rubricEditors: z.array(z.string()).optional(),
+    isRubricEditor: z.boolean().optional(),
+    ai_disabled: z.boolean().default(false),
 });
 
 export const CourseListResponseSchema = z.array(CourseSchema);
@@ -57,6 +60,7 @@ export const CourseRosterSchema = z.object({
     students: z.array(z.string()),
     graders: z.array(z.string()),
     superGraders: z.array(z.string()),
+    rubricEditors: z.array(z.string()),
     courseAdmins: z.array(z.string()),
     inactive_students: z.array(z.string()),
     inactive_graders: z.array(z.string()),
@@ -67,6 +71,7 @@ export const CourseRosterUpdateSchema = z.object({
     students: z.array(z.string()).optional(),
     graders: z.array(z.string()).optional(),
     superGraders: z.array(z.string()).optional(),
+    rubricEditors: z.array(z.string()).optional(),
     courseAdmins: z.array(z.string()).optional(),
 });
 

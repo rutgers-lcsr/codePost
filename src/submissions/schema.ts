@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QueryResponseSchemaBase } from "../api";
+import { QueryResponseSchemaBase } from "../api/schema";
 import { SubmissionTestSchema } from "../submissionTests";
 export const SubmissionModelSchema = z.object({
     assignment: z.number().int().describe("The related assignment_id."),

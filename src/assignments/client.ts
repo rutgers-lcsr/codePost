@@ -1,4 +1,5 @@
-import { BasicFunctions, getQueryParams, QueryListParams } from "../api";
+import { BasicFunctions, getQueryParams } from "../api/utils";
+import { QueryListParams } from "../api/types";
 import { CommentSerializer } from "../comments";
 import { CodePostHTTP } from "../http";
 import {

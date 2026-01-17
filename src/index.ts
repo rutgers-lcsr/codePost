@@ -5,6 +5,7 @@ export { CodepostClient, createClient } from "./client";
 export { setBaseUrl } from "./http";
 
 // Resource modules
+export * from "./commentTemplates";
 export * from "./assignments";
 export * from "./courses";
 export * from "./execution";

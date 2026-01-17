@@ -1,4 +1,6 @@
-import { BasicFunctions, getQueryParams, QueryListParams } from "../api";
+import { BasicFunctions, getQueryParams } from "../api/utils";
+import { QueryListParams } from "../api/types";
+
 import { CodePostHTTP } from "../http";
 import { CourseSchema } from "./schema";
 import {

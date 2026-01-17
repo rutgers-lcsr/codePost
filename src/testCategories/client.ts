@@ -1,5 +1,5 @@
 import { CodePostHTTP } from "../http";
-import { BasicFunctions } from "../api";
+import { BasicFunctions } from "../api/utils";
 import { TestCategory } from "./types";
 import { TestCategorySchema } from "./schema";
 

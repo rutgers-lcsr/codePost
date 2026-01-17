@@ -1,4 +1,4 @@
-import { BasicFunctions, getQueryParams } from "../api";
+import { BasicFunctions, getQueryParams } from "../api/utils";
 import { CodePostHTTP } from "../http";
 import { AnonymousSubmission, Submission } from "../submissions";
 import { SectionSchema } from "./schema";
@@ -8,9 +8,6 @@ export const Sections = {
     ...BasicFunctions<Section>("/sections", SectionSchema),
     async getSubmissions(sectionId: number, assignmentId: number) {
         const params = getQueryParams({ assignment: assignmentId });
-        return await CodePostHTTP.get<AnonymousSubmission[] | Submission[]>(
-            `/sections/${sectionId}/submissions/`,
-            params,
-        );
+        return await CodePostHTTP.get<AnonymousSubmission[] | Submission[]>(`/sections/${sectionId}/submissions/`, params);
     },
 };
