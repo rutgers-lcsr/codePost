@@ -3,12 +3,12 @@
 # codePost — Deployment Makefile
 # Common operations for managing a self-hosted codePost instance.
 
-COMPOSE := docker compose -f docker-compose.production.yml
+COMPOSE := docker compose
 COMPOSE_MONITOR := $(COMPOSE) --profile monitoring
 COMPOSE_CERTBOT := $(COMPOSE) --profile certbot
 
-.PHONY: help setup up down restart logs status build pull-images \
-        backup-db restore-db migrate shell certbot monitoring
+.PHONY: help setup up down restart logs status build \
+        backup-db restore-db migrate shell certbot monitoring update
 
 help: ## Show this help
 	@echo "codePost Deployment Commands:"
@@ -36,11 +36,11 @@ setup-force: ## Recreate .env from template (overwrites existing)
 
 # ─── Core Operations ─────────────────────────────────────────────────
 
-build: ## Build all container images
+build: ## Build Docker images from source
 	$(COMPOSE) build
 
-up: ## Start all services
-	$(COMPOSE) up -d
+up: ## Build and start all services
+	$(COMPOSE) up -d --build
 	@echo ""
 	@echo "codePost is starting. Check status with: make status"
 	@echo "View logs with: make logs"
@@ -111,15 +111,5 @@ certbot: ## Initialize Let's Encrypt SSL (usage: make certbot DOMAIN=... EMAIL=.
 
 # ─── Updates ─────────────────────────────────────────────────────────
 
-update: ## Pull latest code, rebuild, and restart
-	@echo "Pulling latest code..."
-	cd ../codePost-api && git pull
-	cd ../codePost-ui && git pull
-	git pull
-	@echo "Rebuilding images..."
-	$(COMPOSE) build
-	@echo "Restarting services..."
-	$(COMPOSE) up -d
-	@echo "Running migrations..."
-	$(COMPOSE) exec api python manage.py migrate --noinput
-	@echo "Update complete."
+update: ## Pull latest source, rebuild, migrate, and restart
+	bash update.sh
