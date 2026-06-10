@@ -74,8 +74,11 @@ services:
       - WORKER_SHELL_REDIS_URL=redis://redis:6379
       - WORKER_SHELL_SHARED_SECRET=${WORKER_SHELL_SHARED_SECRET}
     volumes:
-      - datasets:/assignment_datasets
-      - staging:/staging
+      # Host bind mounts (not named volumes): the autograder spawns sibling
+      # containers that re-mount these paths from the host, so the host path
+      # must match HOST_DATASET_ROOT / HOST_STAGING_ROOT.
+      - ${HOST_DATASET_ROOT:-/mnt/datasets}:/assignment_datasets
+      - /tmp/codepost-staging:/staging
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       database:
@@ -103,6 +106,7 @@ services:
     environment:
       - REACT_APP_API_URL=${API_URL}
       - NGINX_SERVER_NAME=${NGINX_SERVER_NAME:-localhost}
+      - CSP_FRAME_ANCESTORS=${CSP_FRAME_ANCESTORS:-}
     volumes:
       - ./certs:/etc/ssl/certs:ro
     healthcheck:
@@ -214,8 +218,11 @@ services:
       - WORKER_DATASET_ROOT=/assignment_datasets
       - WORKER_SHELL_SHARED_SECRET=${WORKER_SHELL_SHARED_SECRET}
     volumes:
-      - datasets:/assignment_datasets
-      - staging:/staging
+      # Host bind mounts (not named volumes): the autograder spawns sibling
+      # containers that re-mount these paths from the host, so the host path
+      # must match HOST_DATASET_ROOT / HOST_STAGING_ROOT.
+      - ${HOST_DATASET_ROOT:-/mnt/datasets}:/assignment_datasets
+      - /tmp/codepost-staging:/staging
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       database:
@@ -259,8 +266,11 @@ services:
       - WORKER_SHELL_REDIS_URL=redis://redis:6379
       - WORKER_SHELL_WORKER_ID=${WORKER_SHELL_WORKER_ID:-worker-1}
     volumes:
-      - datasets:/assignment_datasets
-      - staging:/staging
+      # Host bind mounts (not named volumes): the autograder spawns sibling
+      # containers that re-mount these paths from the host, so the host path
+      # must match HOST_DATASET_ROOT / HOST_STAGING_ROOT.
+      - ${HOST_DATASET_ROOT:-/mnt/datasets}:/assignment_datasets
+      - /tmp/codepost-staging:/staging
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       database:
@@ -344,12 +354,6 @@ volumes:
     driver: local
   redis-data:
     name: codepost-redis-data
-    driver: local
-  datasets:
-    name: codepost-datasets
-    driver: local
-  staging:
-    name: codepost-staging
     driver: local
   certbot-webroot:
     name: codepost-certbot-webroot

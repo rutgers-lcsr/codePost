@@ -5,8 +5,34 @@
 #
 # Installs codePost on a fresh Linux server. Clone the repo and run:
 #   git clone https://github.com/rutgers-lcsr/codePost.git && cd codePost && bash install.sh
+#
+# For a quick local evaluation (no domain, DNS, or SMTP required):
+#   bash install.sh --local
 
 set -euo pipefail
+
+# ─── Options ──────────────────────────────────────────────────────────
+LOCAL_MODE=false
+GENERATED_ADMIN_PASSWORD=false
+SELF_SIGNED=false
+for arg in "$@"; do
+    case "$arg" in
+        --local) LOCAL_MODE=true ;;
+        -h|--help)
+            echo "Usage: install.sh [--local]"
+            echo ""
+            echo "  --local   Evaluation install on this machine: uses localhost,"
+            echo "            a self-signed certificate, and generated admin"
+            echo "            credentials. No domain, DNS, or SMTP needed."
+            echo ""
+            echo "Environment overrides (skip the corresponding prompt, for"
+            echo "non-interactive installs):"
+            echo "  CODEPOST_INSTALL_DIR, CODEPOST_DOMAIN, CODEPOST_ADMIN_EMAIL,"
+            echo "  CODEPOST_ADMIN_PASSWORD, CODEPOST_SMTP_HOST"
+            exit 0 ;;
+        *) echo "Unknown option: $arg (see --help)" >&2; exit 1 ;;
+    esac
+done
 
 # ─── Colors ───────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -67,18 +93,22 @@ if ! command -v openssl &> /dev/null; then
     error "OpenSSL is not installed. Install openssl first."
 fi
 
-# Python 3 (for generating Fernet encryption key)
-if ! command -v python3 &> /dev/null; then
-    error "Python 3 is not installed. Install python3 first."
-fi
-
 # RAM check
 TOTAL_RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 TOTAL_RAM_GB=$((TOTAL_RAM_KB / 1024 / 1024))
 if [[ "$TOTAL_RAM_GB" -lt 4 ]]; then
-    error "Insufficient RAM: ${TOTAL_RAM_GB}GB detected. Minimum 8GB required (16GB recommended for autograder)."
+    error "Insufficient RAM: ${TOTAL_RAM_GB}GB detected. At least 4GB is required to build and run (8GB recommended, 16GB with autograder)."
 elif [[ "$TOTAL_RAM_GB" -lt 8 ]]; then
-    warn "Only ${TOTAL_RAM_GB}GB RAM detected. 8GB minimum recommended (16GB for autograder)."
+    warn "Only ${TOTAL_RAM_GB}GB RAM detected. 8GB recommended (16GB with autograder)."
+fi
+
+# Ports 80/443 must be free for the reverse proxy
+if command -v ss &> /dev/null; then
+    for port in 80 443; do
+        if ss -ltn "( sport = :$port )" 2>/dev/null | grep -q LISTEN; then
+            warn "Port $port is already in use. The codePost proxy needs ports 80 and 443 — stop the conflicting service before starting."
+        fi
+    done
 fi
 
 ok "Prerequisites satisfied (Docker $DOCKER_VERSION, ${TOTAL_RAM_GB}GB RAM)"
@@ -96,6 +126,9 @@ fi
 if [[ ! -f "$INSTALL_DIR/docker-compose.yml" ]]; then
     info "Installing to $INSTALL_DIR"
     mkdir -p "$INSTALL_DIR"
+    if [[ -n "$(ls -A "$INSTALL_DIR" 2>/dev/null)" ]]; then
+        error "Directory $INSTALL_DIR is not empty and does not contain a codePost installation. Choose an empty directory."
+    fi
     cd "$INSTALL_DIR"
     # Clone the deployment repo if not already present
     info "Cloning codePost deployment repo..."
@@ -131,29 +164,55 @@ else
     info "Generating configuration..."
     echo ""
 
-    # Prompt for required values
-    read -rp "  Domain name (e.g., codepost.youruniversity.edu): " DOMAIN
-    if [[ -z "$DOMAIN" ]]; then
-        error "Domain name is required."
-    fi
+    if [[ "$LOCAL_MODE" == true ]]; then
+        DOMAIN="${CODEPOST_DOMAIN:-localhost}"
+        ADMIN_EMAIL="${CODEPOST_ADMIN_EMAIL:-admin@example.com}"
+        if [[ -n "${CODEPOST_ADMIN_PASSWORD:-}" ]]; then
+            ADMIN_PASSWORD="$CODEPOST_ADMIN_PASSWORD"
+        else
+            ADMIN_PASSWORD=$(openssl rand -base64 18 | tr -d '/+=' | head -c 16)
+            GENERATED_ADMIN_PASSWORD=true
+        fi
+        SMTP_HOST="${CODEPOST_SMTP_HOST:-localhost}"
+        info "Local evaluation mode: domain=localhost, self-signed SSL, admin=${ADMIN_EMAIL}"
+    else
+        # Prompt for required values (env vars skip the prompt)
+        DOMAIN="${CODEPOST_DOMAIN:-}"
+        if [[ -z "$DOMAIN" ]]; then
+            read -rp "  Domain name (e.g., codepost.youruniversity.edu): " DOMAIN
+        fi
+        if [[ -z "$DOMAIN" ]]; then
+            error "Domain name is required."
+        fi
 
-    read -rp "  Admin email: " ADMIN_EMAIL
-    if [[ -z "$ADMIN_EMAIL" ]]; then
-        error "Admin email is required."
-    fi
+        ADMIN_EMAIL="${CODEPOST_ADMIN_EMAIL:-}"
+        if [[ -z "$ADMIN_EMAIL" ]]; then
+            read -rp "  Admin email: " ADMIN_EMAIL
+        fi
+        if [[ -z "$ADMIN_EMAIL" ]]; then
+            error "Admin email is required."
+        fi
 
-    read -rsp "  Admin password: " ADMIN_PASSWORD
-    echo ""
-    if [[ -z "$ADMIN_PASSWORD" ]]; then
-        error "Admin password is required."
-    fi
+        ADMIN_PASSWORD="${CODEPOST_ADMIN_PASSWORD:-}"
+        if [[ -z "$ADMIN_PASSWORD" ]]; then
+            read -rsp "  Admin password: " ADMIN_PASSWORD
+            echo ""
+        fi
+        if [[ -z "$ADMIN_PASSWORD" ]]; then
+            error "Admin password is required."
+        fi
 
-    read -rp "  SMTP host (for sending emails, press Enter to skip): " SMTP_HOST
-    SMTP_HOST="${SMTP_HOST:-localhost}"
+        SMTP_HOST="${CODEPOST_SMTP_HOST:-}"
+        if [[ -z "$SMTP_HOST" ]]; then
+            read -rp "  SMTP host (for sending emails, press Enter to skip): " SMTP_HOST
+        fi
+        SMTP_HOST="${SMTP_HOST:-localhost}"
+    fi
 
     # Generate secrets
     SECRET_KEY=$(openssl rand -base64 48 | tr -d '\n')
-    FIELD_ENCRYPTION_KEY=$(python3 -c "import base64, os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())")
+    # FIELD_ENCRYPTION_KEY must be a valid Fernet key: urlsafe base64 of 32 bytes
+    FIELD_ENCRYPTION_KEY=$(openssl rand -base64 32 | tr '+/' '-_')
     WORKER_SHELL_SECRET=$(openssl rand -base64 32 | tr -d '\n')
     DB_PASSWORD=$(openssl rand -base64 24 | tr -d '/+\n' | head -c 32)
     ROOT_DB_PASSWORD=$(openssl rand -base64 24 | tr -d '/+\n' | head -c 32)
@@ -213,17 +272,19 @@ mkdir -p certs
 if [[ -f "certs/fullchain.pem" ]] && [[ -f "certs/privkey.pem" ]]; then
     ok "SSL certificates found in ./certs/"
 else
-    echo ""
-    warn "No SSL certificates found in ./certs/"
-    echo ""
-    echo "  Options:"
-    echo "    1) Place your certificates manually:"
-    echo "       cp /path/to/fullchain.pem certs/fullchain.pem"
-    echo "       cp /path/to/privkey.pem certs/privkey.pem"
-    echo ""
-    echo "    2) Use Let's Encrypt (after starting services):"
-    echo "       make certbot DOMAIN=$DOMAIN EMAIL=$ADMIN_EMAIL"
-    echo ""
+    if [[ "$LOCAL_MODE" != true ]]; then
+        echo ""
+        warn "No SSL certificates found in ./certs/"
+        echo ""
+        echo "  Options:"
+        echo "    1) Place your certificates manually:"
+        echo "       cp /path/to/fullchain.pem certs/fullchain.pem"
+        echo "       cp /path/to/privkey.pem certs/privkey.pem"
+        echo ""
+        echo "    2) Use Let's Encrypt (after starting services):"
+        echo "       make certbot DOMAIN=${DOMAIN:-yourdomain.com} EMAIL=${ADMIN_EMAIL:-admin@example.com}"
+        echo ""
+    fi
 
     # Generate self-signed cert for initial startup
     info "Generating self-signed certificate for initial startup..."
@@ -232,7 +293,10 @@ else
         -out certs/fullchain.pem \
         -subj "/CN=${DOMAIN:-localhost}" \
         2>/dev/null
-    warn "Using self-signed certificate. Replace with real certs for production."
+    SELF_SIGNED=true
+    if [[ "$LOCAL_MODE" != true ]]; then
+        warn "Using self-signed certificate. Replace with real certs for production."
+    fi
 fi
 
 # ─── Build & Start ───────────────────────────────────────────────────
@@ -276,7 +340,25 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "  URL:      https://${DOMAIN:-localhost}"
 echo "  Admin:    ${ADMIN_EMAIL:-<from .env>}"
+if [[ "$GENERATED_ADMIN_PASSWORD" == true ]]; then
+    echo "  Password: ${ADMIN_PASSWORD}   (generated — also saved as API_PASSWORD in .env)"
+fi
 echo "  Install:  $INSTALL_DIR"
+if [[ "$LOCAL_MODE" == true ]]; then
+    echo ""
+    echo "  Local evaluation mode uses a self-signed certificate — your"
+    echo "  browser will show a security warning you can safely bypass."
+fi
+echo ""
+echo "  Next steps:"
+echo "    1. Log in at https://${DOMAIN:-localhost} with the admin account above"
+echo "    2. Create your Organization at https://${DOMAIN:-localhost}/admin/"
+echo "       (university name, email domain, SSO settings)"
+echo "    3. Pre-pull autograder base images:  make pull-images"
+if [[ "$SELF_SIGNED" == true ]] && [[ "$LOCAL_MODE" != true ]]; then
+    echo -e "    4. ${YELLOW}Replace the self-signed certificate with real SSL:${NC}"
+    echo "       make certbot DOMAIN=${DOMAIN:-yourdomain.com} EMAIL=${ADMIN_EMAIL:-admin@example.com}"
+fi
 echo ""
 echo "  Useful commands:"
 echo "    docker compose ps          # Check service status"
@@ -284,9 +366,4 @@ echo "    docker compose logs -f     # View logs"
 echo "    ./update.sh                # Update to latest version"
 echo "    make backup-db             # Backup database"
 echo ""
-if [[ ! -f "certs/fullchain.pem" ]] || openssl x509 -in certs/fullchain.pem -noout -issuer 2>/dev/null | grep -q "CN = ${DOMAIN:-localhost}"; then
-    echo -e "  ${YELLOW}⚠ Using self-signed certificate. Set up real SSL:${NC}"
-    echo "    make certbot DOMAIN=${DOMAIN:-yourdomain.com} EMAIL=${ADMIN_EMAIL:-admin@example.com}"
-    echo ""
-fi
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

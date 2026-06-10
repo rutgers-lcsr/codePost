@@ -27,7 +27,7 @@ setup: ## Initial setup — create .env from template
 		echo "Created .env from template. Edit it with your values before running 'make up'."; \
 		echo ""; \
 		echo "Required: change all CHANGE_ME values in .env"; \
-		echo "Or run: python ../codePost-api/scripts/create_env.py --output .env"; \
+		echo "Or run the full installer instead: bash install.sh"; \
 	fi
 
 setup-force: ## Recreate .env from template (overwrites existing)
@@ -73,17 +73,17 @@ shell: ## Open Django management shell
 
 backup-db: ## Backup database to ./backups/
 	@mkdir -p backups
-	$(COMPOSE) exec database mariadb-dump -u root \
-		--password="$${ROOT_DATABASE_PASSWORD}" \
-		--single-transaction --routines --triggers \
-		codepost > backups/codepost-$$(date +%Y%m%d-%H%M%S).sql
+	$(COMPOSE) exec -T database sh -c \
+		'mariadb-dump -u root --password="$$MARIADB_ROOT_PASSWORD" \
+		--single-transaction --routines --triggers "$$MARIADB_DATABASE"' \
+		> backups/codepost-$$(date +%Y%m%d-%H%M%S).sql
 	@echo "Backup saved to backups/"
 
 restore-db: ## Restore database from backup (usage: make restore-db FILE=backups/file.sql)
 	@if [ -z "$(FILE)" ]; then echo "Usage: make restore-db FILE=backups/file.sql"; exit 1; fi
-	$(COMPOSE) exec -T database mariadb -u root \
-		--password="$${ROOT_DATABASE_PASSWORD}" \
-		codepost < $(FILE)
+	$(COMPOSE) exec -T database sh -c \
+		'mariadb -u root --password="$$MARIADB_ROOT_PASSWORD" "$$MARIADB_DATABASE"' \
+		< $(FILE)
 	@echo "Database restored from $(FILE)"
 
 # ─── Autograder ──────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ certbot: ## Initialize Let's Encrypt SSL (usage: make certbot DOMAIN=... EMAIL=.
 	@if [ -z "$(DOMAIN)" ] || [ -z "$(EMAIL)" ]; then \
 		echo "Usage: make certbot DOMAIN=yourdomain.com EMAIL=admin@yourdomain.com"; exit 1; \
 	fi
-	bash deploy/certbot-init.sh $(DOMAIN) $(EMAIL) docker-compose.production.yml
+	bash deploy/certbot-init.sh $(DOMAIN) $(EMAIL)
 
 # ─── Updates ─────────────────────────────────────────────────────────
 

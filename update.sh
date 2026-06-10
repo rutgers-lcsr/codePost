@@ -31,6 +31,24 @@ if [[ ! -f ".env" ]] || [[ ! -f "docker-compose.yml" ]]; then
     error "No codePost installation found in $(pwd). Run this script from your install directory."
 fi
 
+# ─── Backup Database ─────────────────────────────────────────────────
+if docker inspect codepost-database --format='{{.State.Running}}' 2>/dev/null | grep -q true; then
+    info "Backing up database before update..."
+    mkdir -p backups
+    BACKUP_FILE="backups/codepost-pre-update-$(date +%Y%m%d-%H%M%S).sql"
+    if docker compose exec -T database sh -c \
+        'mariadb-dump -u root --password="$MARIADB_ROOT_PASSWORD" \
+        --single-transaction --routines --triggers "$MARIADB_DATABASE"' \
+        > "$BACKUP_FILE"; then
+        ok "Database backed up to $BACKUP_FILE"
+    else
+        rm -f "$BACKUP_FILE"
+        error "Database backup failed. Aborting update — fix the backup first or run 'make backup-db' manually."
+    fi
+else
+    warn "Database container is not running — skipping pre-update backup."
+fi
+
 # ─── Pull Latest Source ──────────────────────────────────────────────
 info "Pulling latest source code..."
 

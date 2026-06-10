@@ -15,7 +15,7 @@ set -e
 
 DOMAIN="${1:?Usage: $0 <domain> <email>}"
 EMAIL="${2:?Usage: $0 <domain> <email>}"
-COMPOSE_FILE="${3:-docker-compose.production.yml}"
+COMPOSE_FILE="${3:-docker-compose.yml}"
 
 echo "═══════════════════════════════════════════════════"
 echo "  codePost — Let's Encrypt Certificate Setup"
