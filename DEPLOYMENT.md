@@ -191,6 +191,7 @@ Log in to the Django admin at `https://your-domain/admin/` and create an Organiz
 | `HOST_DATASET_ROOT`       | `/mnt/datasets`      | Host path for assignment datasets              |
 | `AUTOGRADER_AUTO_EXECUTE` | `true`               | Auto-run submissions on upload                 |
 | `INNODB_BUFFER_POOL_SIZE` | `1G`                 | MariaDB memory buffer (set to ~70% of RAM)     |
+| `DB_MAX_CONNECTIONS`      | `500`                | MariaDB connection ceiling (max_connections)   |
 | `FLOWER_PORT`             | `5555`               | Port for Flower monitoring dashboard           |
 | `WORKER_SHELL_WORKER_ID`  | `worker-1`           | Identifier for the worker shell relay          |
 

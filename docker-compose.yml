@@ -147,6 +147,9 @@ services:
       - --innodb_log_file_size=256M
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=${DB_MAX_CONNECTIONS:-500}
+      - --wait_timeout=600
+      - --interactive_timeout=3600
     healthcheck:
       test:
         [
