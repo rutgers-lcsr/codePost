@@ -56,10 +56,17 @@ This guide walks you through deploying codePost at your university using Docker 
               │   Celery Worker     │
               │   (Autograder)      │
               │   + Shell Relay     │
+              │   + Beat scheduler  │
               └─────────────────────┘
 ```
 
 All services run as Docker containers on a single host via Docker Compose. For larger deployments, the worker can be split to a separate machine.
+
+> **Beat scheduler**: the `beat` service fires codePost's periodic tasks — scheduled
+> assignment publishing ("Publish at"), quiz attempt finalization, scheduled quiz
+> question generation, and course expiry. Exactly **one** beat instance may run per
+> deployment; never scale it. If beat is down, none of those scheduled actions fire
+> (assignments set to auto-publish will stay unpublished until it returns).
 
 ---
 
@@ -140,7 +147,7 @@ The first start will:
 1. Initialize the MariaDB database
 2. Run Django migrations to create all tables
 3. Create the admin user specified in `.env`
-4. Start the API, UI, worker, and proxy
+4. Start the API, UI, worker, beat scheduler, and proxy
 
 ### 5. Verify
 

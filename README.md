@@ -317,6 +317,14 @@ After making API changes:
 - **Bulk operations**: Upload submissions, export grades, and manage rosters via SDKs
 - **Self-hostable**: Run on your own infrastructure for full data control
 
+### User Guides
+
+- [The Assignment Lifecycle](docs/assignment-lifecycle.md) — how instructors control
+  what students see and do (Draft → Visible → Preview → Published → Closed →
+  Archived), scheduled publishing, and how grade/feedback release works
+- Feature documentation for developers lives in the API repo under `docs/`
+  (e.g. `docs/quizzes.md`, `docs/assignment_lifecycle.md`)
+
 ### Getting Help
 
 - Open an issue in the relevant repository
