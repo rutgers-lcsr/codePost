@@ -20,7 +20,7 @@ Preview if you spot a mistake in the hand-out).
 | Status | Students see it | Students can read the files | Students can submit | Typical use |
 |---|:---:|:---:|:---:|---|
 | **Draft** | ✗ | ✗ | ✗ | You're still writing it. Invisible to students. |
-| **Visible** | ✓ | ✗ | ✗ | An announcement: students see the name, due date, and points on their dashboard so they can plan ahead. |
+| **Visible** | ✓ | ✗ | ✗ | An announcement: students see the name, due date, points, and your assignment description on their dashboard so they can plan ahead. |
 | **Preview** | ✓ | ✓ | ✗ | The hand-out is readable — students can download the files and set up their environment, but can't submit yet. |
 | **Published** | ✓ | ✓ | ✓ | Open for work. Students download files and submit (submitting also requires **Allow student upload** in the assignment's settings). |
 | **Closed** | ✓ | ✓ | ✗ | Submitting is over. Students still see the assignment and their own submission. |
