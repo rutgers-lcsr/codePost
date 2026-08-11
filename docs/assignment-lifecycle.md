@@ -59,24 +59,33 @@ A common pattern for a big assignment:
    set up; submissions open automatically on schedule.
 4. It **Closes** by itself at the deadline.
 
-## Grades and feedback are a separate switch
+## Grades and feedback: the Feedback column
 
 The status controls the *work* — seeing the assignment, reading files, submitting.
-**What students see of their grading is controlled separately by "Release feedback".**
+**What students see of their grading is controlled separately by the Feedback column**,
+right next to Status:
 
-Until you release feedback, students cannot see — no matter the status:
+| Feedback | What students see |
+|---|---|
+| **Hidden** (default) | Nothing — grade at your own pace. |
+| **Live** | Feedback appears immediately as it's written — for office hours and ungraded exercises. |
+| **Per student** | Each student sees their grades, comments, and the rubric as soon as *their own* submission is finalized — a rolling release with no global switch. |
+| **Released** | Everything is out for all finalized submissions at once. |
 
-- their grades or your comments,
-- the rubric,
-- the full autograder test list, or the contents of a finalized (graded) submission.
+Two extras:
 
-This means you can grade at your own pace on a Published or Closed assignment, and then
-reveal everything at once with one switch. (Exception: **live feedback mode**, designed
-for office hours and ungraded exercises, shows feedback immediately as it's written.)
+- **Hide grades** (in settings, or the row menu) masks *numeric grades* in any of the
+  revealing modes — students see comments and the rubric but no number. Useful for
+  feedback-first grading.
+- **Release at** (settings → Publishing) schedules an automatic move to Released at a
+  time you pick — "grades out Friday 5pm" without being at a keyboard.
 
-While an assignment is Published but feedback is not yet released, students *can* see
-that their submission was received and its status — they just can't see inside the
-grading.
+While an assignment is Published but feedback is Hidden, students still see that their
+submission was received — they just can't see inside the grading.
+
+One caveat for quizzes: a quiz timed to the *whole assignment's* feedback release can't
+be used with per-student feedback (there's no single release moment) — use the
+self-paced quiz trigger instead; codePost will point this out if you try.
 
 ## Hiding an assignment from specific sections
 
@@ -92,7 +101,8 @@ students can no longer submit and the badge reflects what students actually expe
 Extend the due date to reopen, or select Closed to make it permanent.
 
 **Why can't my students see the rubric while they work?**
-The rubric is part of grading, so it appears when you **release feedback**. If you want
+The rubric is part of grading, so it appears when the Feedback column opens it (Live, Per
+student once finalized, or Released). If you want
 students to see criteria up front, put them in the assignment description, or use live
 feedback mode.
 
