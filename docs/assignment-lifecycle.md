@@ -1,9 +1,14 @@
 # The Assignment Lifecycle — Instructor Guide
 
-Every assignment on codePost is in exactly one **status**, shown as a colored badge in
-your Assignments table. The status controls what students can see and do. You change it
-by clicking the badge and picking a new status — nothing is visible to students until
-you say so.
+Every assignment on codePost carries two colored badges in your Assignments table:
+
+- **Status** — controls the *work*: whether students see the assignment, can read its
+  files, and can submit.
+- **Feedback** — controls the *grading*: whether students see grades, comments, and
+  the rubric.
+
+Click either badge to open a picker where every option explains itself. Nothing is
+visible to students until you say so. This guide covers Status first, then Feedback.
 
 ```
 Draft ──▶ Visible ──▶ Preview ──▶ Published ──▶ Closed ──▶ Archived
@@ -28,6 +33,9 @@ Preview if you spot a mistake in the hand-out).
 
 A few behaviors worth knowing:
 
+- **Your description travels with the assignment.** The description you write in
+  settings appears on the student's dashboard (they expand the assignment row to read
+  it) and above their files while they work — from Visible onward.
 - **New assignments start as Draft.** So do cloned assignments — cloning also turns off
   student upload and clears due dates, so a copied assignment can never accept
   submissions by accident. Re-enable upload when you're ready.
@@ -74,9 +82,11 @@ right next to Status:
 
 Two extras:
 
-- **Hide grades** (in settings, or the row menu) masks *numeric grades* in any of the
-  revealing modes — students see comments and the rubric but no number. Useful for
-  feedback-first grading.
+- **Hide grades** masks *numeric grades* in any of the revealing modes — students see
+  comments and the rubric but no number. Useful for feedback-first grading. Toggle it
+  with the grades button on the assignment row (the `#` turns into a crossed-out eye)
+  or in Settings → Grading. The button is disabled while Feedback is Hidden, since no
+  grades show then anyway.
 - **Release at** (settings → Publishing) schedules an automatic move to Released at a
   time you pick — "grades out Friday 5pm" without being at a keyboard.
 
@@ -116,8 +126,18 @@ No. Moving backwards (Published → Preview, or anything → Draft) only changes
 students can see and do. Submissions and grades are kept.
 
 **What do my scripts get from the API?**
-Scripts read and write the assignment's `state` field
-(`draft`/`visible`/`preview`/`published`/`closed`/`archived`), plus a read-only
-`effectiveState` that includes the automatic close. The old `isVisible`/`isReleased`
-fields are still returned for compatibility (read-only, derived from the state) —
-writing them returns an error telling you to set `state` instead.
+Scripts read and write two fields: `state`
+(`draft`/`visible`/`preview`/`published`/`closed`/`archived`) for the work axis, and
+`feedbackStatus` (`hidden`/`live`/`per_student`/`released`) for the feedback axis —
+plus a read-only `effectiveState` that includes the automatic close, and the
+schedulers `publishAt` / `releaseFeedbackAt`. The old boolean fields
+(`isVisible`, `isReleased`, `feedbackReleased`, `liveFeedbackMode`) are still returned
+for compatibility, read-only and derived from the two status fields — writing them
+returns an error telling you which field to set instead.
+
+**How do I tell students their feedback is ready?**
+Feedback notifications are per submission: when a grader finalizes, codePost offers to
+email that student (if the course has feedback notifications enabled), and staff can
+send the same email from a submission at any time once its feedback is visible. The
+whole-assignment **Notify students** email in the Status badge's popover announces
+*publication*, not feedback.
