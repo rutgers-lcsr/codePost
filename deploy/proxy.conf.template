@@ -30,9 +30,16 @@ server {
 
     error_log /var/log/nginx/error.log warn;
 
+    # Docker DNS: re-resolve container names at request time (paired with the
+    # $upstream_* variables in proxy_pass) so a recreated api/ui container never
+    # leaves nginx pointing at a stale IP, and nginx starts even if one is not up yet.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $upstream_api codepost-api;
+    set $upstream_ui codepost-ui;
+
     # ── WebSocket (Django Channels) ────
     location /ws/ {
-        proxy_pass http://codepost-api:8000;
+        proxy_pass http://$upstream_api:8000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
@@ -45,7 +52,8 @@ server {
 
     # ── API routes → Django ────
     location /api/ {
-        proxy_pass http://codepost-api:8000;
+        proxy_pass http://$upstream_api:8000;
+        error_page 502 503 504 @api_unavailable;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -53,7 +61,8 @@ server {
     }
 
     location /admin/ {
-        proxy_pass http://codepost-api:8000;
+        proxy_pass http://$upstream_api:8000;
+        error_page 502 503 504 @api_unavailable;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -61,18 +70,28 @@ server {
     }
 
     location /health-check {
-        proxy_pass http://codepost-api:8000;
+        proxy_pass http://$upstream_api:8000;
+        error_page 502 503 504 @api_unavailable;
         proxy_set_header Host $host;
     }
 
     location /static/ {
-        proxy_pass http://codepost-api:8000;
+        proxy_pass http://$upstream_api:8000;
         proxy_set_header Host $host;
+    }
+
+    # When the API container is down or restarting, answer JSON (+ Retry-After)
+    # instead of nginx's HTML 502 so the SPA can show one "API unavailable" banner
+    # and retry. Same origin here, so no CORS headers are needed.
+    location @api_unavailable {
+        default_type application/json;
+        add_header Retry-After 10 always;
+        return 503 '{"detail": "codePost API is temporarily unavailable. Please retry shortly."}';
     }
 
     # ── Everything else → React UI ────
     location / {
-        proxy_pass https://codepost-ui:8443;
+        proxy_pass https://$upstream_ui:8443;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

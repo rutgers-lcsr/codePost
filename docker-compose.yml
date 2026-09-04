@@ -90,6 +90,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 330s
     restart: unless-stopped
     logging:
       driver: json-file
@@ -237,6 +238,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 330s
     restart: always
     logging:
       driver: json-file
@@ -267,7 +269,7 @@ services:
       - DB_USERNAME=${DB_USERNAME:-codepost_user}
       - DB_PASSWORD=${DB_PASSWORD}
       - SECRET_KEY=${SECRET_KEY}
-    command: ["sh", "-c", "celery --app autograder beat --loglevel info --schedule /tmp/celerybeat-schedule"]
+    command: ["sh", "-c", "python manage.py wait_for_db && celery --app autograder beat --loglevel info --schedule /tmp/celerybeat-schedule"]
     depends_on:
       database:
         condition: service_healthy
