@@ -20,7 +20,11 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
 
-    client_max_body_size 6M;
+    # Keep in sync with MAX_REQUEST_BODY_BYTES in codePost-api/core/constants.py (the
+    # source for Django's DATA_UPLOAD_MAX_MEMORY_SIZE and the API image's own nginx).
+    # Oversized bodies answer with the JSON 413 in @too_large, the same shape the API
+    # itself returns, so the SPA shows one "upload too large" message either way.
+    client_max_body_size 50M;
 
     # Security headers
     add_header X-Content-Type-Options nosniff always;
@@ -51,9 +55,28 @@ server {
     }
 
     # ── API routes → Django ────
+    # Dataset uploads (AssignmentDataSet.file, up to MAX_DATASET_SIZE = 1 GB in
+    # core/constants.py): multipart, streamed straight to the API instead of being
+    # spooled here, and exempt from the 50M cap that still guards every other route.
+    location /api/assignmentDataSets/ {
+        proxy_pass http://$upstream_api:8000;
+        error_page 502 503 @api_unavailable;
+        error_page 504 @api_timeout;
+        error_page 413 @too_large;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 1G;
+        proxy_read_timeout 3600;
+        proxy_request_buffering off;
+    }
+
     location /api/ {
         proxy_pass http://$upstream_api:8000;
-        error_page 502 503 504 @api_unavailable;
+        error_page 502 503 @api_unavailable;
+        error_page 504 @api_timeout;
+        error_page 413 @too_large;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -62,7 +85,8 @@ server {
 
     location /admin/ {
         proxy_pass http://$upstream_api:8000;
-        error_page 502 503 504 @api_unavailable;
+        error_page 502 503 @api_unavailable;
+        error_page 504 @api_timeout;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -71,7 +95,8 @@ server {
 
     location /health-check {
         proxy_pass http://$upstream_api:8000;
-        error_page 502 503 504 @api_unavailable;
+        error_page 502 503 @api_unavailable;
+        error_page 504 @api_timeout;
         proxy_set_header Host $host;
     }
 
@@ -87,6 +112,19 @@ server {
         default_type application/json;
         add_header Retry-After 10 always;
         return 503 '{"detail": "codePost API is temporarily unavailable. Please retry shortly."}';
+    }
+
+    # Upstream took longer than proxy_read_timeout: not an outage, so no Retry-After.
+    location @api_timeout {
+        default_type application/json;
+        return 504 '{"detail": "The request took too long to complete. Please try again; if it keeps happening, contact support."}';
+    }
+
+    # Body over client_max_body_size: JSON instead of nginx's HTML 413 (same origin,
+    # so no CORS headers needed). Mirrors core/exceptions.py in the API.
+    location @too_large {
+        default_type application/json;
+        return 413 '{"detail": "Upload too large: a single request may not exceed 50 MB."}';
     }
 
     # ── Everything else → React UI ────
