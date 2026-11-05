@@ -12,6 +12,11 @@ one sentence — what students can see and do right now — and then shows two c
 Every option explains itself. Nothing is visible to students until you say so. This guide
 covers Work first, then Feedback.
 
+A row also carries at most one green button for the move it is waiting for: **Publish** on a
+draft, **Assign graders** when a closed assignment has submissions nobody has claimed, or
+**Release feedback** once everything is graded and feedback is still hidden. Each opens the
+same confirmation the picker does.
+
 ```
 Draft ──▶ Visible ──▶ Preview ──▶ Published ──▶ Closed ──▶ Archived
 (build)   (announce)  (hand out)  (open for      (no more    (retire)
