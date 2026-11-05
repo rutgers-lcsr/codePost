@@ -1,14 +1,16 @@
 # The Assignment Lifecycle — Instructor Guide
 
-Every assignment on codePost carries two colored badges in your Assignments table:
+Every assignment on codePost carries one colored badge in your Assignments table, **Stage**,
+with a line under it for whatever else applies. Click it to open a picker that starts with
+one sentence — what students can see and do right now — and then shows two columns:
 
-- **Status** — controls the *work*: whether students see the assignment, can read its
+- **Work** — controls the *work*: whether students see the assignment, can read its
   files, and can submit.
 - **Feedback** — controls the *grading*: whether students see grades, comments, and
   the rubric.
 
-Click either badge to open a picker where every option explains itself. Nothing is
-visible to students until you say so. This guide covers Status first, then Feedback.
+Every option explains itself. Nothing is visible to students until you say so. This guide
+covers Work first, then Feedback.
 
 ```
 Draft ──▶ Visible ──▶ Preview ──▶ Published ──▶ Closed ──▶ Archived
@@ -41,8 +43,8 @@ A few behaviors worth knowing:
   submissions by accident. Re-enable upload when you're ready.
 - **Closed usually happens by itself.** When the submission deadline passes (including
   any late-day window you allow), a Published assignment automatically shows **Closed**
-  and stops accepting submissions — you don't have to do anything. The badge shows a
-  small clock icon when this happened automatically. To *reopen*, extend the due date.
+  and stops accepting submissions — you don't have to do anything. The badge says
+  "Past due date" underneath when this happened automatically. To *reopen*, extend the due date.
   To close **early** (say, an exam window ended), set the status to Closed yourself.
 - **Publishing is guarded.** codePost asks you to confirm before publishing, and
   reassures you: if grading of existing submissions is still in progress, publishing
@@ -84,8 +86,8 @@ Two extras:
 
 - **Hide grades** masks *numeric grades* in any of the revealing modes — students see
   comments and the rubric but no number. Useful for feedback-first grading. Toggle it
-  with the grades button on the assignment row (the `#` turns into a crossed-out eye)
-  or in Settings → Grading. The button is disabled while Feedback is Hidden, since no
+  with the **Hide numeric grades** checkbox under the Feedback column of the Stage picker,
+  or in Settings → Publishing. The checkbox is disabled while Feedback is Hidden, since no
   grades show then anyway.
 - **Release at** (settings → Publishing) schedules an automatic move to Released at a
   time you pick — "grades out Friday 5pm" without being at a keyboard.
@@ -139,5 +141,5 @@ returns an error telling you which field to set instead.
 Feedback notifications are per submission: when a grader finalizes, codePost offers to
 email that student (if the course has feedback notifications enabled), and staff can
 send the same email from a submission at any time once its feedback is visible. The
-whole-assignment **Notify students** email in the Status badge's popover announces
+whole-assignment **Notify students** email in the Stage picker announces
 *publication*, not feedback.
